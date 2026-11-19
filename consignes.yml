@@ -1,0 +1,45 @@
+# =====================================================================
+#  PANNEAU DE COMMANDE — SLEEPY MIMO
+#  Modifie ce fichier sur GitHub (icône crayon ✏️ puis « Commit changes »).
+#  L'équipe lit tes consignes à chaque production.
+#  Règle d'écriture : garde les espaces au début des lignes et le « : » après chaque mot.
+# =====================================================================
+
+# Mettre l'équipe en pause (oui = rien n'est produit cette nuit)
+pause: non
+
+# Envoyer les vidéos sur YouTube (en privé) ? non = vidéos seulement téléchargeables dans GitHub
+envoyer_sur_youtube: oui
+
+# ---------- Vidéo longue ----------
+duree_video_longue_minutes: 30
+# Décor imposé pour la vidéo longue (laisser vide pour que le Stratège choisisse)
+# Choix : lune, nuages, ocean, neige, lucioles, pluie
+decor_video_longue:
+
+# ---------- Shorts ----------
+nombre_shorts: 3            # de 0 à 5
+duree_shorts_secondes: 45   # de 15 à 170
+
+# Phrases affichées en haut des Shorts (2 lignes, en anglais). Le système en choisit une au hasard.
+textes_shorts:
+  - ["Sleep tight,", "little one"]
+  - ["Time to sleep,", "little star"]
+  - ["Sweet dreams,", "little bear"]
+
+# ---------- Ce que l'équipe a le droit d'utiliser ----------
+# Décors autorisés (enlève ceux que tu ne veux plus voir)
+decors_autorises: [lune, nuages, ocean, neige, lucioles, pluie]
+
+# Instruments autorisés : boite_a_musique, piano, harpe, clochettes
+instruments_autorises: [boite_a_musique, piano, harpe, clochettes]
+
+# Comptines traditionnelles autorisées dans la vidéo longue
+# Choix : twinkle, frere_jacques, row_your_boat, brahms, mary_lamb, london_bridge
+comptines_autorisees: [twinkle, frere_jacques, row_your_boat, brahms, mary_lamb, london_bridge]
+
+# Part de berceuses originales dans la vidéo longue (0 = que des comptines, 100 = que des originales)
+pourcentage_originales: 50
+
+# Tags ajoutés en plus sur toutes les vidéos
+tags_en_plus: []
