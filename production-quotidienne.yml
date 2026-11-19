@@ -1,0 +1,55 @@
+name: Sleepy Mimo - production quotidienne
+
+on:
+  schedule:
+    - cron: "0 2 * * *"   # tous les jours à 2h00 UTC (3h ou 4h à Paris)
+  workflow_dispatch:       # bouton « Run workflow » pour lancer à la main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  produire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer les outils
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q ffmpeg libcairo2
+          mkdir -p ~/.fonts && cp fonts/Fredoka.ttf ~/.fonts/ && fc-cache -f
+          pip install -q -r requirements.txt
+
+      - name: L'équipe produit la journée
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: python main.py
+
+      - name: Garder les vidéos en téléchargement (7 jours)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: videos-du-jour
+          path: output/
+          retention-days: 7
+
+      - name: Sauvegarder la mémoire et le rapport
+        if: always()
+        run: |
+          git config user.name "Sleepy Mimo Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add history.json reports/ || true
+          git commit -m "Rapport du $(date -u +%F)" || echo "Rien à enregistrer"
+          git push || echo "Push impossible"
