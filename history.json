@@ -3,36 +3,35 @@
   {
    "date": "2026-11-20",
    "long": {
-    "title": "Bedtime Lullabies for Babies & Toddlers ⭐ Firefly Forest Soft Piano | 36 Min | Sleepy Mimo",
-    "theme": "forest",
+    "title": "Bedtime Lullabies for Babies & Toddlers ⭐ Snowy Night Soft Piano | 34 Min | Sleepy Mimo",
+    "theme": "snow",
     "originals": [
-     "Mimo's Starlight Hush",
-     "Mimo's Silver Dream",
-     "Mimo's Sleepy Goodnight",
-     "Mimo's Whisper Lullaby",
-     "Mimo's Sleepy Hush",
-     "Mimo's Silver Night Song",
-     "Mimo's Starlight Night Song"
+     "Mimo's Gentle Dream",
+     "Mimo's Stardust Night Song",
+     "Mimo's Cozy Night Song",
+     "Mimo's Snuggly Goodnight",
+     "Mimo's Twinkly Goodnight",
+     "Mimo's Whisper Song"
     ],
     "video_id": null
    },
    "shorts": [
     {
-     "title": "Sleepy Mimo Falls Asleep on the Moon ✨ Lullaby for Babies #shorts",
-     "theme": "snow",
-     "song": "Mimo's Starlight Serenade",
+     "title": "Mimo's Cozy Goodnight 🌙 Baby Lullaby #shorts #babysleep",
+     "theme": "forest",
+     "song": "Mimo's Cozy Goodnight",
      "video_id": null
     },
     {
-     "title": "Mimo's Stardust Song 🌙 Baby Lullaby #shorts #babysleep",
+     "title": "Mimo's Twinkly Serenade 🌙 Baby Lullaby #shorts #babysleep",
      "theme": "ocean",
-     "song": "Mimo's Stardust Song",
+     "song": "Mimo's Twinkly Serenade",
      "video_id": null
     },
     {
-     "title": "Mimo Falls Asleep on the Moon under twinkling stars 💤 Mimo's Misty Nap Song #shorts #lullaby",
+     "title": "Mimo Falls Asleep on the Moon under twinkling stars 💤 Mimo's Starlight Melody #shorts #lullaby",
      "theme": "moon",
-     "song": "Mimo's Misty Nap Song",
+     "song": "Mimo's Starlight Melody",
      "video_id": null
     }
    ]
