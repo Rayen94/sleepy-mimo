@@ -38,7 +38,7 @@ EP1 = dict(id="s1e01", title="Hello, Mimo!", chapters=[
             ("duck", "But the lantern hill is far away, on the other side of the river."),
             ("mimo", "Hmm. How can we cross the river?"),
             ("duck", "I know! My grandma's little boat! It's waiting by the water!")]),
-        dict(decor="river", boat=True, cast=[("mimo", 560, 560, L), ("bunny", 730, 730, R)], lines=[
+        dict(decor="river", boat=True, cast=[("mimo", 560, 560, L), ("bunny", 730, 730, R), ("duck", 1450, 1000, R)], lines=[
             ("narrator", "So the three friends climbed into the little boat."),
             ("duck", "Quack! I'll swim next to you. Ducks don't need boats!"),
             ("bunny", "Mimo, how do we make the boat go?"),
@@ -347,4 +347,77 @@ EP4 = dict(id="s1e04", title="The Bedtime Bell", chapters=[
        ("narrator", "Find out in the next episode: Finn Learns to Share!")]))
 
 
-LONG_EPISODES = {"s1e01": EP1, "s1e02": EP2, "s1e03": EP3, "s1e04": EP4}
+EP5 = dict(id="s1e05", title="Finn Learns to Share", chapters=[
+    dict(label="The Biggest Bridge Ever", story=[
+        dict(decor="meadow", cast=[("fox", 640, 640, L)], lines=[
+            ("narrator", "Finn the fox loved building things. Towers of pinecones. Houses of leaves. And bridges. Lots of bridges."),
+            ("fox", "Today, I'm going to build the biggest bridge ever! All the way across the stream, to the lantern hill!"),
+            ("fox", "And I'll build it all by myself. Because I'm the best builder in the whole land!")]),
+        dict(decor="meadow", cast=[("fox", 640, 640, L), ("mimo", -150, 330, L), ("kitten", 1450, 960, R)], lines=[
+            ("mimo", "Wow, Finn! That's a big pile of sticks! Can we help you build?"),
+            ("kitten", "Meow! I'm very good at finding flat stones!"),
+            ("fox", "No, thank you. It's my bridge. I want to do it alone."),
+            ("kitten", "Oh. Okay, Finn."),
+            ("narrator", "So Mimo and Mia sat down on the grass, and watched Finn work."),
+            ("mimo", "Let's sing a little song while we wait. Maybe it will help Finn too.")]),
+    ], song=dict(name="Twinkle Twinkle Little Star", decor="meadow", cast=[("mimo", 330, L), ("kitten", 560, L), ("fox", 900, R)], voice="box", transpose=0, sleepy=None)),
+
+    dict(label="Crash!", story=[
+        dict(decor="meadow", cast=[("fox", 640, 640, L), ("mimo", 300, 300, L), ("kitten", 980, 980, R)], lines=[
+            ("narrator", "Finn built, and built, and built. The bridge grew longer and longer."),
+            ("fox", "Almost done! Just one more stick, and..."),
+            ("narrator", "CRASH! The whole bridge fell down into the stream."),
+            ("fox", "Oh no! My bridge! It fell down!"),
+            ("mimo", "Are you okay, Finn?"),
+            ("fox", "I'll try again. All by myself."),
+            ("narrator", "But it fell down again. And again. And again.")]),
+        dict(decor="river", cast=[("fox", 560, 560, L), ("fish", 1450, 920, R)], lines=[
+            ("fish", "Blub, blub. Hello, Finn. I keep finding your sticks floating down my river!"),
+            ("fox", "Sorry, Bubbles. My bridge keeps falling down. Building is too hard."),
+            ("fish", "Hmm. Do you know how the river gets so big and strong, Finn?"),
+            ("fox", "How?"),
+            ("fish", "Lots of little streams, all coming together. Blub. Together is strong."),
+            ("fox", "Together... is strong.")]),
+    ], song=dict(name="Row Row Row Your Boat", decor="river", cast=[("fox", 420, L), ("fish", 860, R)], voice="harp", transpose=2)),
+
+    dict(label="Building Together", story=[
+        dict(decor="meadow", cast=[("fox", -150, 640, L), ("mimo", 300, 300, L), ("kitten", 980, 980, R), ("bunny", 1600, 1170, R), ("duck", -350, 110, L)], lines=[
+            ("fox", "Mimo, Mia... I'm sorry I said no. I wanted to do everything alone. But I can't."),
+            ("mimo", "That's okay, Finn. Everybody needs help sometimes."),
+            ("kitten", "Do you still want to build the bridge? With us?"),
+            ("fox", "Yes! Please! Will you help me?"),
+            ("mimo", "Of course! That's what friends do."),
+            ("narrator", "And soon, more friends came to help."),
+            ("bunny", "Hop hop! I can carry the little sticks!"),
+            ("duck", "Quack! And I can check the water!"),
+            ("fox", "Okay, team! Mimo holds, Mia finds stones, Pip carries, Dot checks. Ready? Let's build!")]),
+    ], song=dict(name="London Bridge", decor="meadow", cast=[("bunny", 200, L), ("kitten", 400, L), ("fox", 620, L), ("mimo", 840, R), ("duck", 1060, R)], voice="soft", transpose=0)),
+
+    dict(label="Our Bridge", story=[
+        dict(decor="night", cast=[("fox", 640, 640, L), ("mimo", 400, 400, L), ("kitten", 880, 880, R), ("owl", 1450, 1100, R)], lines=[
+            ("narrator", "When the sky turned purple, the bridge was finished. And it was strong, and long, and beautiful."),
+            ("fox", "Look! It's standing! It's really standing! Our bridge!"),
+            ("kitten", "Our bridge. I like how that sounds."),
+            ("owl", "Hoo hoo. What a wonderful bridge. Who built it?"),
+            ("fox", "We all did, Luna! Together! I learned that sharing the work makes everything better."),
+            ("owl", "That is a very wise lesson, little fox. Shall we walk across it, all together?"),
+            ("mimo", "Yes! And let's sing the bridge song, so it stays strong forever!")]),
+    ], song=dict(name="London Bridge", decor="night", cast=[("bunny", 220, L), ("fox", 440, L), ("mimo", 660, L), ("kitten", 880, R), ("owl", 1090, R)], voice="bell", transpose=2)),
+
+    dict(label="A Proud Fox", story=[
+        dict(decor="night", cast=[("fox", 520, 520, L), ("mimo", 760, 760, R)], lines=[
+            ("fox", "Mimo... this was the best building day ever. Not because the bridge is big..."),
+            ("fox", "But because I built it with my friends."),
+            ("mimo", "Me too, Finn. Now let's rest. Builders need lots of sleep!"),
+            ("narrator", "And on the lantern hill, next to their beautiful bridge, all the friends curled up and closed their eyes."),
+            ("narrator", "Goodnight, Finn. Goodnight, builders. Goodnight, everyone.")]),
+    ], song=None),
+], finale=dict(decor="night", cast=[("duck", 230, L), ("fox", 440, L), ("mimo", 650, L), ("kitten", 860, R), ("bunny", 1070, R)], minutes=12),
+   teaser=dict(decor="bedroom", cast=[("mimo", 640, 860, L)], lines=[
+       ("narrator", "Next time, on Sleepy Mimo..."),
+       ("mimo", "One, two, three, four... Wait. Where's Twinkle? She's not in the sky!"),
+       ("narrator", "Has the littlest star really disappeared? And where could she have gone?"),
+       ("narrator", "Find out in the next episode: Mimo and the Lost Star!")]))
+
+
+LONG_EPISODES = {"s1e01": EP1, "s1e02": EP2, "s1e03": EP3, "s1e04": EP4, "s1e05": EP5}
