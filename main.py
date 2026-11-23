@@ -140,7 +140,7 @@ def main():
         log("Publieur : envoi désactivé ou connexion non configurée, vidéos laissées en téléchargement")
 
     # ---------- Mémoire + rapport ----------
-    mem.add_day(dict(date=date,
+    mem.add_day(dict(date=date, run=os.environ.get("GITHUB_RUN_ID", "local"),
                      long=dict(title=long_meta["title"], theme=plan["long_theme"], story=story["id"] if story else None, episode=episode if story else None,
                                originals=[t["item"][1] for t in plan["tracks"] if t["item"][0] == "orig"],
                                video_id=results[0].get("video_id")),
