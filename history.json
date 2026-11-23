@@ -110,10 +110,53 @@
   {
    "date": "2026-11-23",
    "long": {
-    "title": "Hello, Mimo! 🌟 Episode 1 | Sleepy Mimo Bedtime Story & Sing-Along",
-    "theme": "forest",
+    "title": "Sleepy Mimo Episode 1: Hello, Mimo! 🌙 Bedtime Story & Lullabies",
+    "theme": "rain",
     "story": "s1e01",
     "episode": 1,
+    "originals": [
+     "Mimo's Pillow Hush",
+     "Mimo's Misty Lullaby",
+     "Mimo's Lavender Hush",
+     "Mimo's Feather Tune",
+     "Mimo's Twinkly Melody",
+     "Mimo's Gentle Song",
+     "Mimo's Silver Serenade",
+     "Mimo's Stardust Goodnight",
+     "Mimo's Whisper Lullaby",
+     "Mimo's Misty Goodnight",
+     "Mimo's Sleepy Night Song"
+    ],
+    "video_id": "vH_9waGlnFQ"
+   },
+   "shorts": [
+    {
+     "title": "Hello, Mimo! (Part 1) 🌙 Sleepy Mimo Episode 1 #shorts #kids",
+     "theme": "clouds",
+     "song": "Mimo's Starlight Song",
+     "video_id": "fsSncWOFFIg"
+    },
+    {
+     "title": "Hello, Mimo! (Part 2) 🌙 Sleepy Mimo Episode 1 #shorts #kids",
+     "theme": "snow",
+     "song": "Mimo's Cozy Tune",
+     "video_id": "4NsxuisLSEo"
+    },
+    {
+     "title": "Hello, Mimo! (Part 3) 🌙 Sleepy Mimo Episode 1 #shorts #kids",
+     "theme": "forest",
+     "song": "Mimo's Silver Night Song",
+     "video_id": "JNACpqFSFUs"
+    }
+   ]
+  },
+  {
+   "date": "2026-11-23",
+   "long": {
+    "title": "Sleepy Mimo Episode 2: Dot's First Swim 🌙 Bedtime Story with Songs for Kids",
+    "theme": "forest",
+    "story": "s1e02",
+    "episode": 2,
     "originals": [
      "Mimo's Stardust Serenade",
      "Mimo's Cuddly Melody",
@@ -123,9 +166,28 @@
      "Mimo's Whisper Nap Song",
      "Mimo's Velvet Dream"
     ],
-    "video_id": "iESH1y1BH3E"
+    "video_id": "Lv3uSbWpMDU"
    },
-   "shorts": []
+   "shorts": [
+    {
+     "title": "Dot's First Swim (Part 1) 🌙 Sleepy Mimo Episode 2 #shorts #kids",
+     "theme": "clouds",
+     "song": "Mimo's Dreamy Lullaby",
+     "video_id": "SlwsCs5sCiY"
+    },
+    {
+     "title": "Dot's First Swim (Part 2) 🌙 Sleepy Mimo Episode 2 #shorts #kids",
+     "theme": "snow",
+     "song": "Mimo's Lavender Serenade",
+     "video_id": "XVB7bQ9hKbM"
+    },
+    {
+     "title": "Dot's First Swim (Part 3) 🌙 Sleepy Mimo Episode 2 #shorts #kids",
+     "theme": "rain",
+     "song": "Mimo's Moonbeam Tune",
+     "video_id": "FjeP4a-k-vc"
+    }
+   ]
   }
  ]
 }
