@@ -12,6 +12,13 @@ class Memory:
     def recent_themes(self, days=2):
         return {d["long"]["theme"] for d in self.data["days"][-days:]}
 
+    def recent_stories(self, days=3):
+        return {d["long"].get("story") for d in self.data["days"][-days:] if d["long"].get("story")}
+
+    def next_episode(self):
+        eps = [d["long"].get("episode", 0) or 0 for d in self.data["days"]]
+        return (max(eps) if eps else 0) + 1
+
     def used_titles(self):
         out = set()
         for d in self.data["days"]:

@@ -12,7 +12,17 @@ pause: non
 envoyer_sur_youtube: oui
 
 # ---------- Vidéo longue ----------
-duree_video_longue_minutes: 30
+duree_video_longue_minutes: 60
+# Changer de décor (et d'instrument) toutes les X minutes dans la vidéo longue
+changer_de_decor_toutes_les_minutes: 15
+# Sons d'ambiance doux sous la musique (pluie, vagues, vent, bruit blanc) : oui / non
+sons_ambiance: oui
+# Comptines chantées par la voix de Mimo, avec les paroles en karaoké à l'écran : oui / non
+voix_chantee: oui
+# Intro « Sleepy Mimo » de 5 secondes au début de la vidéo longue : oui / non
+intro_sleepy_mimo: oui
+# Une petite histoire animée avec les personnages qui parlent (en anglais), au début de la vidéo longue : oui / non
+histoire: oui
 # Décor imposé pour la vidéo longue (laisser vide pour que le Stratège choisisse)
 # Choix : lune, nuages, ocean, neige, lucioles, pluie
 decor_video_longue:
@@ -21,7 +31,15 @@ decor_video_longue:
 nombre_shorts: 3            # de 0 à 5
 duree_shorts_secondes: 45   # de 15 à 170
 
-# Phrases affichées en haut des Shorts (2 lignes, en anglais). Le système en choisit une au hasard.
+# Accroche affichée en GROS pendant les 3 premières secondes des Shorts (2 lignes, 18 caractères max, en anglais)
+accroches_shorts:
+  - ["Shhh...", "Mimo is sleeping"]
+  - ["Play this for", "your baby"]
+  - ["Bedtime with", "Mimo"]
+  - ["Close your eyes,", "little one"]
+  - ["Can you hear", "the lullaby?"]
+
+# Phrases affichées ensuite en haut des Shorts (2 lignes, en anglais). Le système en choisit une au hasard.
 textes_shorts:
   - ["Sleep tight,", "little one"]
   - ["Time to sleep,", "little star"]
@@ -39,7 +57,7 @@ instruments_autorises: [boite_a_musique, piano, harpe, clochettes]
 comptines_autorisees: [twinkle, frere_jacques, row_your_boat, brahms, mary_lamb, london_bridge]
 
 # Part de berceuses originales dans la vidéo longue (0 = que des comptines, 100 = que des originales)
-pourcentage_originales: 50
+pourcentage_originales: 35
 
 # Tags ajoutés en plus sur toutes les vidéos
 tags_en_plus: []

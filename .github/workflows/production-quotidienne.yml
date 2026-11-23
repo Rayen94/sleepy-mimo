@@ -2,7 +2,7 @@ name: Sleepy Mimo - production quotidienne
 
 on:
   schedule:
-    - cron: "0 2 * * *"   # tous les jours à 2h00 UTC (3h ou 4h à Paris)
+    - cron: "23 23 * * *"   # tous les jours vers 0h23 à Paris (hors de l'heure pile, moins de retard)
   workflow_dispatch:       # bouton « Run workflow » pour lancer à la main
 
 permissions:
@@ -15,20 +15,33 @@ concurrency:
 jobs:
   produire:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 240
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Installer les outils
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q ffmpeg libcairo2
+          sudo apt-get install -y -q ffmpeg libcairo2 libass9 espeak-ng mbrola mbrola-us1 mbrola-us3 fluidsynth fluid-soundfont-gm
           mkdir -p ~/.fonts && cp fonts/Fredoka.ttf ~/.fonts/ && fc-cache -f
           pip install -q -r requirements.txt
+
+      - name: Garder le modèle de voix en mémoire
+        uses: actions/cache@v4
+        with:
+          path: models
+          key: kokoro-v1.0
+
+      - name: Télécharger le modèle de voix naturelles (une seule fois)
+        run: |
+          mkdir -p models
+          B=https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0
+          [ -s models/kokoro-v1.0.int8.onnx ] || curl -sSL -o models/kokoro-v1.0.int8.onnx $B/kokoro-v1.0.int8.onnx
+          [ -s models/voices-v1.0.bin ] || curl -sSL -o models/voices-v1.0.bin $B/voices-v1.0.bin
 
       - name: L'équipe produit la journée
         env:

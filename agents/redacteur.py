@@ -1,22 +1,32 @@
 """Agent 6 — Rédacteur SEO : titres, descriptions et tags en anglais, sans promesses trompeuses."""
 from .illustrateur import THEMES
-from .compositeur import VOICE_NAMES
+from .compositeur import VOICE_NAMES, AMBIENCE, AMBIENCE_NAMES
 
 PROP_SENTENCE = {"moon": "falls asleep on the moon", "cloud": "drifts off on a soft cloud", "boat": "rocks gently in his little boat"}
 FX_SENTENCE = {"stars": "under twinkling stars", "snow": "while snowflakes fall", "fireflies": "among glowing fireflies",
                "rain": "to the sound of a gentle rain"}
 
 LONG_TITLES = [
-    "{theme} Lullabies for Babies 😴 {m} Min of {voice} Sleep Music | Sleepy Mimo",
-    "Baby Sleep Music 🌙 {m} Minutes of {voice} Lullabies | {theme} | Sleepy Mimo",
-    "{voice} Lullabies for Babies to Go to Sleep 💤 {theme} | {m} Min | Sleepy Mimo",
-    "Bedtime Lullabies for Babies & Toddlers ⭐ {theme} {voice} | {m} Min | Sleepy Mimo",
+    "Baby Sleep Music 🌙 {dur} of {voice} Lullabies | {theme} | Sleepy Mimo",
+    "Lullabies for Babies to Go to Sleep 😴 {dur} | {voice} & {amb} | Sleepy Mimo",
+    "{theme} Lullabies for Babies 💤 {dur} of Soothing Sleep Music | Sleepy Mimo",
+    "Bedtime Lullabies for Babies & Toddlers ⭐ {dur} of {voice} | Sleepy Mimo",
+    "{dur} Baby Lullaby with {amb} 🌙 Calm {voice} Music for Sleep | Sleepy Mimo",
 ]
 SHORT_TITLES = [
-    "Mimo {action} {fx} 💤 {song} #shorts #lullaby",
-    "{song} 🌙 Baby Lullaby #shorts #babysleep",
-    "Sleepy Mimo {action} ✨ Lullaby for Babies #shorts",
+    "Play This When Your Baby Can't Sleep 🌙 {song} #shorts #lullaby",
+    "Shhh… Mimo Is Sleeping 💤 {song} #shorts #babysleep",
+    "{secs} Seconds of Calm for Your Baby ✨ {song} #shorts",
+    "Mimo {action} {fx} 💤 #shorts #lullaby",
 ]
+
+
+def dur_label(sec):
+    m = int(round(sec / 60))
+    if m >= 55:
+        h = round(m / 60)
+        return f"{h} Hour" + ("s" if h > 1 else "")
+    return f"{m} Min"
 
 
 def fmt(sec):
@@ -24,30 +34,61 @@ def fmt(sec):
     return f"{sec // 3600}:{sec % 3600 // 60:02d}:{sec % 60:02d}" if sec >= 3600 else f"{sec // 60}:{sec % 60:02d}"
 
 
-def long_meta(rng, plan, stamps, total, used_titles, extra_tags=()):
+SUNG_TITLES = [
+    "Bedtime Sing-Along Lullabies for Babies 🌙 {dur} with Lyrics | Sleepy Mimo",
+    "Nursery Rhymes & Lullabies for Babies 😴 {dur} | Sing Along with Mimo",
+    "Twinkle Twinkle Little Star & More Bedtime Songs 💤 {dur} | Sleepy Mimo",
+    "Sleepy Nursery Rhymes for Babies & Toddlers ⭐ {dur} with Lyrics | Sleepy Mimo",
+]
+
+
+STORY_TITLES = [
+    "Sleepy Mimo Episode {ep}: {story} 🌙 Bedtime Story & Lullabies",
+    "{story} ✨ Sleepy Mimo Episode {ep} | Story + Nursery Rhymes for Kids",
+    "Sleepy Mimo Ep. {ep} 😴 {story} | Bedtime Story & Sing-Along Songs",
+]
+
+
+def long_meta(rng, plan, stamps, total, used_titles, extra_tags=(), sung=False, story=None):
     th = THEMES[plan["long_theme"]]
-    m = int(round(total / 60))
+    dur = dur_label(total)
     voice = " & ".join(VOICE_NAMES[v] for v in dict.fromkeys(plan["voices"]))
     voice_short = VOICE_NAMES[plan["voices"][0]]
+    amb = AMBIENCE_NAMES[AMBIENCE[plan["long_theme"]]]
     title = None
-    order = list(rng.permutation(len(LONG_TITLES)))
-    for i in order:
-        cand = LONG_TITLES[i].format(theme=th["name"], m=m, voice=voice_short)
+    pool = STORY_TITLES if story else (SUNG_TITLES if sung else LONG_TITLES)
+    for i in rng.permutation(len(pool)):
+        cand = pool[i].format(theme=th["name"], dur=dur, voice=voice_short, amb=amb, story=story["title"] if story else "", ep=story.get("episode", "") if story else "")
         if cand not in used_titles and len(cand) <= 100:
             title = cand; break
-    title = title or f"{th['name']} Lullabies for Babies 😴 {m} Min | Sleepy Mimo #{len(used_titles)+1}"
+    title = title or f"{th['name']} Lullabies for Babies 😴 {dur} | Sleepy Mimo #{len(used_titles)+1}"
     chapters = []
-    for pos, p in stamps:
-        name = p["item"][1]
-        chapters.append(f"{fmt(pos)} {name} ({VOICE_NAMES[p['voice']]})")
-    desc = (f"🌙 Mimo the little bear {PROP_SENTENCE[th['prop']]} {FX_SENTENCE[th['fx']]}… and so will your baby!\n\n"
-            f"{m} minutes of gentle {voice.lower()} lullabies to help babies and toddlers wind down for naptime and bedtime. "
+    if story:
+        chapters.append(f"0:00 Story: {story['title']}")
+    for j, (pos, p) in enumerate(stamps):
+        pos = 0 if (j == 0 and not story) else pos          # YouTube exige un premier chapitre à 0:00
+        chapters.append(f"{fmt(pos)} {p['item'][1]} ({VOICE_NAMES[p['voice']]})")
+    journey = [THEMES[t]["name"] for t in plan["scene_themes"]]
+    trip = (f"Tonight Mimo drifts through {len(journey)} dreamy places: " + ", ".join(journey[:-1]) + f" and {journey[-1]}."
+            if len(journey) > 1 else "")
+    songs = list(dict.fromkeys(p["item"][1] for _, p in stamps if p.get("lyrics")))
+    singalong = ""
+    if songs:
+        names = songs[0] if len(songs) == 1 else ", ".join(songs[:-1]) + " and " + songs[-1]
+        singalong = f"🎤 Sing along with Mimo! Lyrics on screen for {names}.\n"
+    storyline = (f"📺 Sleepy Mimo, episode {story.get('episode', '')}: {story['title']}.\n"
+                 f"📖 Mimo and his friends talk, play and help each other before bedtime. A new episode of the series every day!\n"
+                 if story else "")
+    desc = (storyline + f"🌙 Mimo the little bear {PROP_SENTENCE[th['prop']]} {FX_SENTENCE[th['fx']]}… and so will your baby!\n\n" + singalong +
+            f"{dur} of gentle {voice.lower()} lullabies with soft background sounds to help babies and toddlers wind down "
+            f"for naptime and bedtime. {trip}\n"
             f"Original melodies by Sleepy Mimo and new arrangements of traditional nursery songs.\n\n"
-            + "\n".join(chapters) +
+            "⏱️ Chapters\n" + "\n".join(chapters) +
             "\n\n💤 Subscribe for new lullabies with Mimo!\n\n#lullaby #babysleepmusic #bedtime")
     tags = ["lullabies for babies", "baby sleep music", "bedtime lullabies", f"{th['name'].lower()} lullaby",
             f"{voice_short.lower()} lullaby", "lullaby for babies to go to sleep", "soothing music for babies",
-            "toddler bedtime songs", f"{m} minute lullaby", "sleepy mimo", "baby lullaby", "relaxing baby music"] + list(extra_tags)
+            "toddler bedtime songs", f"{dur.lower()} lullaby", f"lullaby with {amb.lower()}", "sleepy mimo",
+            "baby lullaby", "relaxing baby music"] + list(extra_tags)
     return dict(title=title, description=desc, tags=tags)
 
 
@@ -56,7 +97,7 @@ def short_meta(rng, s, used_titles, extra_tags=()):
     small = {"on", "the", "a", "in", "his", "off"}
     action = " ".join(w if (w in small and i) else w.capitalize() for i, w in enumerate(PROP_SENTENCE[th["prop"]].split()))
     for i in rng.permutation(len(SHORT_TITLES)):
-        cand = SHORT_TITLES[i].format(action=action, fx=FX_SENTENCE[th["fx"]], song=s["name"])
+        cand = SHORT_TITLES[i].format(action=action, fx=FX_SENTENCE[th["fx"]], song=s["name"], secs=int(s["seconds"]))
         if cand not in used_titles and len(cand) <= 100:
             title = cand; break
     else:
@@ -68,7 +109,15 @@ def short_meta(rng, s, used_titles, extra_tags=()):
     return dict(title=title, description=desc, tags=tags)
 
 
-def short_overlay(s, W, H):
-    from .illustrateur import text
-    lines = s["overlay"]
-    return text(W / 2, H * 0.14, lines[0], 84, "#FFF4C9") + text(W / 2, H * 0.14 + 100, lines[1], 84, "#FFD35C")
+def short_story_meta(rng, story, part, parts, used_titles, extra_tags=()):
+    ep, t = story["episode"], story["title"]
+    pt = f" (Part {part})" if parts > 1 else ""
+    cands = [f"{t}{pt} 🌙 Sleepy Mimo Episode {ep} #shorts #kids",
+             f"Sleepy Mimo Ep. {ep}: {t}{pt} ✨ #shorts #bedtimestory",
+             f"{t}{pt} 💤 Bedtime Story for Kids | Sleepy Mimo #shorts"]
+    title = next((c for c in cands if c not in used_titles and len(c) <= 100), cands[0][:100])
+    desc = (f"A little moment from Sleepy Mimo, episode {ep}: {t}. 🌙\n"
+            "Mimo and his friends talk, play and get ready for bed. Watch the full episode on the channel, with songs and lullabies! 💤\n"
+            "#shorts #bedtimestory #kids #lullaby")
+    tags = ["sleepy mimo", "bedtime story", "story for kids", "kids cartoon", "shorts", "lullaby", t.lower()] + list(extra_tags)
+    return dict(title=title, description=desc, tags=tags)

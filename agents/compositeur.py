@@ -2,7 +2,7 @@
 du domaine public (aucun enregistrement ni arrangement d'un tiers n'est utilisé)."""
 import math, wave
 import numpy as np
-from scipy.signal import fftconvolve
+from scipy.signal import fftconvolve, butter, sosfilt, sosfilt_zi
 
 SR = 44100
 NOTE = {'C': 0, 'D': 2, 'E': 4, 'F': 5, 'G': 7, 'A': 9, 'B': 11}
@@ -108,27 +108,49 @@ def pad(notes, dur):
     return y * env / len(notes)
 
 
-def render(bpm, mel, ch, voice, octave, transpose, min_seconds):
+def bass(f, dur):
+    n = int(SR * (dur + 1.5)); t = np.arange(n) / SR
+    y = np.sin(2*np.pi*f*t) + 0.25*np.sin(4*np.pi*f*t)*np.exp(-t*3)
+    env = np.minimum(1, t / 0.03) * np.exp(-t * 0.9) * np.where(t > dur, np.exp(-(t - dur) * 4), 1)
+    return y * env
+
+
+def render(bpm, mel, ch, voice, octave, transpose, min_seconds, seed=0):
+    """Mélodie + accords tenus + basse douce + contre-mélodie en arpège (une reprise sur deux).
+    Petites variations de tempo et de force pour un jeu plus humain."""
+    hum = np.random.default_rng(seed)
     b = 60 / bpm
     L = sum(d for _, d in mel) * b
     reps = max(1, math.ceil(min_seconds / L))
     out = np.zeros(int(SR * (L * reps + 8)))
+
+    def add(x, at):
+        i = max(0, int(at * SR)); out[i:i + len(x)] += x[:len(out) - i]
+
     for r in range(reps):
         off = r * L; t = off
         oc = octave + (12 if voice in ("box", "bell") and r % 2 == 1 else 0)
-        for m, d in mel:
-            x = tone(hz(60 + m + oc + transpose), d * b, voice) * (0.32 if r % 2 == 0 else 0.26)
-            i = int(t * SR); out[i:i + len(x)] += x[:len(out) - i]; t += d * b
+        for j, (m, d) in enumerate(mel):
+            jit = 0 if j == 0 else float(np.clip(hum.normal(0, 0.007), -0.015, 0.015))
+            vel = (0.32 if r % 2 == 0 else 0.27) * float(np.clip(1 + hum.normal(0, 0.07), 0.8, 1.2))
+            add(tone(hz(60 + m + oc + transpose), d * b, voice) * vel, t + jit); t += d * b
         t = off
         for c, d in ch:
-            x = pad([48 + transpose + k for k in CHORDS[c]], d * b) * 0.10
-            i = int(t * SR); out[i:i + len(x)] += x[:len(out) - i]; t += d * b
+            add(pad([48 + transpose + k for k in CHORDS[c]], d * b) * 0.10, t)
+            add(bass(hz(36 + transpose + CHORDS[c][0]), d * b) * 0.10, t)
+            if r % 2 == 1 and reps > 1:
+                tones = CHORDS[c] + [CHORDS[c][0] + 12]
+                for k in range(int(d)):
+                    m = 60 + transpose + tones[k % len(tones)]
+                    add(tone(hz(m), b, "harp") * 0.06 * float(np.clip(1 + hum.normal(0, 0.1), 0.7, 1.3)), t + (k + 0.5) * b)
+            t += d * b
     out = out[:int(SR * (L * reps + 4))]
     k = int(SR * 4); out[-k:] *= np.linspace(1, 0, k)
     return out
 
 
 _IR = None
+_WARM = butter(2, 6500, 'low', fs=SR, output='sos')
 
 
 def reverb(dry):
@@ -137,15 +159,25 @@ def reverb(dry):
         g = np.random.default_rng(0)
         t = np.arange(int(SR * 2.8)) / SR
         _IR = [g.standard_normal(len(t)) * np.exp(-t * 2.6) * 0.02 for _ in range(2)]
+    dry = sosfilt(_WARM, dry)
     L = fftconvolve(dry, _IR[0])[:len(dry)]; R = fftconvolve(dry, _IR[1])[:len(dry)]
     st = np.stack([dry * 0.8 + L * 0.9, dry * 0.8 + R * 0.9], 1)
     return st / max(1.0, np.abs(st).max() / 0.6)
 
 
+def limit(x, knee=0.6, ceil=0.9):
+    """Limiteur doux : rien ne change sous le seuil, aucune saturation au-dessus."""
+    a = np.abs(x)
+    over = a > knee
+    x = x.copy()
+    x[over] = np.sign(x[over]) * (knee + (ceil - knee) * np.tanh((a[over] - knee) / (ceil - knee)))
+    return x
+
+
 def write_wav(path, chunks):
     wf = wave.open(path, "wb"); wf.setnchannels(2); wf.setsampwidth(2); wf.setframerate(SR)
     for c in chunks:
-        wf.writeframes((np.clip(c, -1, 1) * 32767).astype("<i2").tobytes())
+        wf.writeframes((np.clip(limit(c), -1, 1) * 32767).astype("<i2").tobytes())
     wf.close()
 
 
@@ -158,26 +190,168 @@ def track_spec(item, rng):
     return compose(rng)
 
 
-def build_long(plan, rng, path):
-    """plan : liste de dicts {item, voice, octave, transpose, seconds, tempo}. Écrit le WAV, renvoie les chapitres."""
-    stamps, pos = [], 0.0
+# ---------------------------------------------------------------- Sons d'ambiance
+AMBIENCE = {"moon": "shush", "clouds": "shush", "ocean": "ocean", "snow": "wind", "forest": "night", "rain": "rain"}
+AMBIENCE_NAMES = {"shush": "Soft White Noise", "ocean": "Ocean Waves", "wind": "Soft Wind", "night": "Night Sounds",
+                  "rain": "Rain Sounds"}
+
+
+class Ambience:
+    """Bruit d'ambiance continu (filtres gardés d'un morceau à l'autre pour éviter les clics)."""
+    FILTERS = {
+        "shush": [butter(2, 2800, "low", fs=SR, output="sos"), butter(1, 120, "high", fs=SR, output="sos")],
+        "rain":  [butter(2, [700, 7000], "band", fs=SR, output="sos")],
+        "ocean": [butter(2, 500, "low", fs=SR, output="sos")],
+        "wind":  [butter(2, [250, 1100], "band", fs=SR, output="sos")],
+        "night": [butter(2, 400, "low", fs=SR, output="sos")],
+    }
+    LEVEL = {"shush": 0.020, "rain": 0.030, "ocean": 0.050, "wind": 0.030, "night": 0.015}
+
+    def __init__(self, seed=1):
+        self.rng = np.random.default_rng(seed)
+        self.state = {}
+        self.clock = {}
+
+    def make(self, kind, n, fade_in=False, fade_out=False):
+        noise = self.rng.standard_normal((n, 2))
+        sts = self.state.setdefault(kind, [[sosfilt_zi(f) * 0 for _ in range(2)] for f in self.FILTERS[kind]])
+        for fi, f in enumerate(self.FILTERS[kind]):
+            for c in range(2):
+                noise[:, c], sts[fi][c] = sosfilt(f, noise[:, c], zi=sts[fi][c])
+        t0 = self.clock.get(kind, 0.0)
+        t = t0 + np.arange(n) / SR
+        self.clock[kind] = t0 + n / SR
+        if kind == "ocean":
+            env = 0.3 + 0.7 * (0.5 - 0.5 * np.cos(2 * np.pi * t / 9.0)) ** 1.6
+            env2 = 0.3 + 0.7 * (0.5 - 0.5 * np.cos(2 * np.pi * (t + 3.1) / 11.0)) ** 1.6
+            noise[:, 0] *= env; noise[:, 1] *= env2
+        elif kind == "wind":
+            env = 0.6 + 0.25 * np.sin(2 * np.pi * t / 13.0) + 0.15 * np.sin(2 * np.pi * t / 5.3 + 1)
+            noise *= env[:, None]
+        elif kind == "rain":
+            noise *= (0.9 + 0.1 * np.sin(2 * np.pi * t / 7.0))[:, None]
+        noise *= self.LEVEL[kind] / (np.sqrt(np.mean(noise ** 2)) + 1e-9)
+        if kind == "night":  # quelques grillons très discrets
+            for _ in range(int(n / SR / 2.5)):
+                st = int(self.rng.uniform(0, max(1, n - SR)))
+                ln = int(SR * 0.35); tt = np.arange(ln) / SR
+                chirp = np.sin(2 * np.pi * 4300 * tt) * (np.sin(2 * np.pi * 28 * tt) > 0.3) * np.sin(np.pi * tt / 0.35) * 0.006
+                pan = self.rng.uniform(0.2, 0.8)
+                noise[st:st + ln, 0] += chirp[:n - st] * pan; noise[st:st + ln, 1] += chirp[:n - st] * (1 - pan)
+        k = min(n // 2, int(SR * 3))
+        if fade_in:
+            noise[:k] *= np.linspace(0, 1, k)[:, None]
+        if fade_out:
+            noise[-k:] *= np.linspace(1, 0, k)[:, None]
+        return noise
+
+
+def play(bpm, mel, ch, voice, octave, transpose, seconds, seed=0, lively=False):
+    """Musique stéréo prête à mixer : vrais instruments (orchestre) si disponibles, sinon synthèse maison."""
+    from . import orchestre
+    if orchestre.available():
+        return orchestre.render(bpm, mel, ch, voice, octave, transpose, seconds, seed=seed, lively=lively)
+    return reverb(render(bpm, mel, ch, voice, octave, transpose, seconds, seed=seed))
+
+
+def pass_schedule(bpm, mel, reps):
+    """Instants (en s) de chaque note, passage par passage, comme dans render()."""
+    b = 60 / bpm
+    L = sum(d for _, d in mel) * b
+    out = []
+    for r in range(reps):
+        t, row = r * L, []
+        for m, d in mel:
+            row.append((t, m, d * b)); t += d * b
+        out.append(row)
+    return out, L
+
+
+def intro_audio(seconds=5.0):
+    """Petit carillon d'ouverture « Sleepy Mimo »."""
+    n = int(SR * seconds)
+    out = np.zeros(n + SR * 5)
+    for i, m in enumerate([72, 76, 79, 84, 79, 88]):
+        x = tone(hz(m), 1.2, "bell") * (0.22 if i < 5 else 0.18)
+        j = int(SR * (0.35 + i * 0.32)); out[j:j + len(x)] += x[:len(out) - j]
+    x = pad([60, 64, 67, 72], 3.5) * 0.08
+    j = int(SR * 0.3); out[j:j + len(x)] += x[:len(out) - j]
+    st = reverb(out)[:n]
+    k = int(SR * 1.0); st[-k:] *= np.linspace(1, 0, k)[:, None]
+    return st
+
+
+def build_long(plan, rng, path, ambience=True, intro=5.0, vocals=True, story_audio=None, outro_audio=None):
+    """plan : liste de dicts {item, voice, octave, transpose, seconds, tempo, theme, lyrics}.
+    Écrit le WAV. Renvoie les chapitres, la durée totale et les paroles minutées (pour le karaoké)."""
+    from . import chanteur, parolier
+    stamps, karaoke, pos = [], [], 0.0
+    amb = Ambience(int(rng.integers(1e9)))
+    sing_ok = vocals and chanteur.available()
 
     def gen():
         nonlocal pos
-        for p in plan:
+        if intro:
+            data = intro_audio(intro)
+            if ambience and plan:
+                data = data + amb.make(AMBIENCE[plan[0]["theme"]], len(data), fade_in=True) * 0.6
+            pos += len(data) / SR
+            yield data
+        if story_audio is not None:
+            data = story_audio.copy()
+            if ambience and plan:
+                data = data + amb.make(AMBIENCE[plan[0]["theme"]], len(data)) * 0.5
+            pos += len(data) / SR
+            yield data
+        for i, p in enumerate(plan):
             bpm, mel, ch = p["spec"]
-            st = reverb(render(bpm * p["tempo"], mel, ch, p["voice"], p["octave"], p["transpose"], p["seconds"]))
+            song = p.get("lyrics")
+            st = play(bpm * p["tempo"], mel, ch, p["voice"], p["octave"], p["transpose"], p["seconds"], seed=i, lively=bool(song))
+            if sing_ok and song and parolier.check(song, len(mel)):
+                reps = max(1, math.ceil(p["seconds"] / (sum(d for _, d in mel) * 60 / (bpm * p["tempo"]))))
+                sched, _ = pass_schedule(bpm * p["tempo"], mel, reps)
+                syl = [s for line in parolier.lines(song) for s in line]
+                events = []
+                for r in range(min(2, reps)):
+                    k = 0
+                    for line in parolier.lines(song):
+                        times = []
+                        for disp, sung in line:
+                            t0, m, d = sched[r][k]
+                            events.append((sung, [(60 + m + p["transpose"], d * 0.97)], t0))
+                            times.append(pos + t0); k += 1
+                        karaoke.append(dict(syllables=[d for d, _ in line], times=times,
+                                            end=pos + sched[r][k - 1][0] + sched[r][k - 1][2]))
+                voice = chanteur.sing(events, len(st) / SR)
+                vrev = reverb(voice[:, 0] * 0.5 + voice[:, 1] * 0.5)
+                n = min(len(st), len(vrev))
+                st = st * 0.8
+                st[:n] += vrev[:n] * 0.75
             stamps.append((pos, p))
             data = np.concatenate([st, np.zeros((SR * 2, 2))])
+            if ambience:
+                kind = AMBIENCE[p["theme"]]
+                last = i == len(plan) - 1 or AMBIENCE[plan[i + 1]["theme"]] != kind
+                first = (i == 0 and not intro) or (i > 0 and AMBIENCE[plan[i - 1]["theme"]] != kind)
+                data += amb.make(kind, len(data), fade_in=first, fade_out=last)
+            pos += len(data) / SR
+            yield data
+        if outro_audio is not None:
+            data = outro_audio.copy()
+            if ambience and plan:
+                data = data + amb.make(AMBIENCE[plan[-1]["theme"]], len(data), fade_in=True) * 0.5
             pos += len(data) / SR
             yield data
     write_wav(path, gen())
-    return stamps, pos
+    return stamps, pos, karaoke
 
 
-def build_short(spec, voice, octave, transpose, seconds, path):
+def build_short(spec, voice, octave, transpose, seconds, path, theme=None, ambience=True, seed=0):
     bpm, mel, ch = spec
-    st = reverb(render(bpm, mel, ch, voice, octave, transpose, seconds + 1))[:int(SR * seconds)]
+    st = play(bpm, mel, ch, voice, octave, transpose, seconds + 1, seed=seed)[:int(SR * seconds)]
+    if ambience and theme:
+        st = st + Ambience(seed + 7).make(AMBIENCE[theme], len(st), fade_in=True)
     k = int(SR * 2.5); st[-k:] *= np.linspace(1, 0, k)[:, None]
+    k = int(SR * 0.3); st[:k] *= np.linspace(0, 1, k)[:, None]
     write_wav(path, [st])
     return seconds

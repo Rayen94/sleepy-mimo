@@ -3,7 +3,7 @@ Chaque jour : 1 vidéo longue + 3 Shorts, contrôlés puis envoyés en privé su
 import os, sys, datetime, shutil
 import numpy as np
 from agents import strategiste, compositeur, illustrateur, monteur, redacteur, miniaturiste
-from agents import controleur_qualite, gardien_regles, publieur, analyste, rapporteur
+from agents import controleur_qualite, gardien_regles, publieur, analyste, rapporteur, realisateur, histoires
 from agents.archiviste import Memory
 from agents import consignes
 
@@ -34,26 +34,57 @@ def main():
     plan = strategiste.plan_day(rng, mem, cfg)
 
     # ---------- Vidéo longue ----------
-    log(f"Compositeur : {len(plan['tracks'])} morceaux pour la vidéo longue")
-    stamps, total = compositeur.build_long(plan["tracks"], rng, f"{OUT}/long.wav")
-    log("Illustrateur : animation de la vidéo longue")
-    illustrateur.render_loop(plan["long_theme"], 1280, 720, f"{OUT}/frames_long", seed=int(rng.integers(1e6)))
-    log("Monteur : assemblage")
-    monteur.encode_loop(f"{OUT}/frames_long", f"{OUT}/long_loop.mp4")
-    monteur.mux(f"{OUT}/long_loop.mp4", f"{OUT}/long.wav", f"{OUT}/long.mp4")
-    long_meta = redacteur.long_meta(rng, plan, stamps, total, used_titles, cfg["extra_tags"])
+    n_loop = monteur.FPS * 16
+    sung = sum(1 for t in plan["tracks"] if t.get("lyrics"))
+    log(f"Compositeur + Chanteur : {len(plan['tracks'])} morceaux dont {sung} chantés "
+        f"({len(plan['scene_themes'])} décors : {', '.join(plan['scene_themes'])})")
+    story, outro = None, None
+    episode = mem.next_episode()
+    if plan.get("story"):
+        st = plan["story"]
+        log(f"Scénariste + Comédiens : histoire « {st['title']} »")
+        s_audio, s_shots, s_subs, s_total = histoires.build(st, rng, compositeur.track_spec(("orig", "story"), rng))
+        story = dict(title=st["title"], id=st["id"], shots=s_shots, subs=s_subs, total=s_total, audio=s_audio,
+                     seed=int(rng.integers(1e6)), start=5.0 if cfg["intro"] else 0.0, episode=episode,
+                     card=f"Episode {episode}: {st['title']}", raw=st)
+        o_audio, o_shots, o_subs, o_total = histoires.outro(st, rng)
+        outro = dict(shots=o_shots, subs=o_subs, total=o_total, audio=o_audio, seed=int(rng.integers(1e6)))
+    stamps, total, karaoke = compositeur.build_long(plan["tracks"], rng, f"{OUT}/long.wav", ambience=cfg["ambience"],
+                                                    intro=5.0 if cfg["intro"] else 0.0, vocals=cfg["vocals"],
+                                                    story_audio=story["audio"] if story else None,
+                                                    outro_audio=outro["audio"] if outro else None)
+    if outro:
+        outro["start"] = total - outro["total"]
+    realisateur.build_long(stamps, total, f"{OUT}/long.wav", f"{OUT}/long.mp4", OUT, rng, karaoke, log=log, story=story,
+                           outro=outro, episode=episode if story else None)
+    long_meta = redacteur.long_meta(rng, plan, stamps, total, used_titles, cfg["extra_tags"], sung=bool(karaoke), story=story)
     miniaturiste.make(plan["long_theme"], int(round(total / 60)), f"{OUT}/long_thumbnail.png", int(rng.integers(1e6)))
 
     # ---------- Shorts ----------
-    short_metas = []
-    for i, s in enumerate(plan["shorts"], 1):
-        log(f"Short {i} : {s['name']} ({s['theme']})")
-        compositeur.build_short(s["spec"], s["voice"], s["octave"], s["transpose"], s["seconds"], f"{OUT}/short{i}.wav")
-        illustrateur.render_loop(s["theme"], 1080, 1920, f"{OUT}/frames_s{i}", seed=int(rng.integers(1e6)),
-                                 overlay=redacteur.short_overlay(s, 1080, 1920))
-        monteur.encode_loop(f"{OUT}/frames_s{i}", f"{OUT}/s{i}_loop.mp4")
-        monteur.mux(f"{OUT}/s{i}_loop.mp4", f"{OUT}/short{i}.wav", f"{OUT}/short{i}.mp4")
-        short_metas.append(redacteur.short_meta(rng, s, used_titles, cfg["extra_tags"]))
+    short_metas, short_durs = [], []
+    if story and cfg["n_shorts"]:
+        # Shorts tirés de l'épisode du jour : un moment de l'histoire par Short
+        parts = histoires.short_parts(story["shots"], story["total"], cfg["n_shorts"])
+        import wave
+        for i, (t0, t1) in enumerate(parts, 1):
+            log(f"Short {i} : épisode {episode}, partie {i}/{len(parts)} ({t1 - t0:.0f} s)")
+            x = histoires.short_audio(story["audio"], t0, t1)
+            w = wave.open(f"{OUT}/short{i}.wav", "wb"); w.setnchannels(2); w.setsampwidth(2); w.setframerate(44100)
+            w.writeframes((np.clip(compositeur.limit(x), -1, 1) * 32767).astype("<i2").tobytes()); w.close()
+            frames = histoires.short_frames(story["shots"], t0, t1, story["seed"], episode, story["title"], i, len(parts))
+            monteur.encode(frames, f"{OUT}/short{i}.mp4", gop=monteur.FPS * 2, audio=f"{OUT}/short{i}.wav", crf=21)
+            short_metas.append(redacteur.short_story_meta(rng, story, i, len(parts), used_titles, cfg["extra_tags"]))
+            short_durs.append(t1 - t0)
+    else:
+        for i, s in enumerate(plan["shorts"], 1):
+            log(f"Short {i} : {s['name']} ({s['theme']})")
+            compositeur.build_short(s["spec"], s["voice"], s["octave"], s["transpose"], s["seconds"], f"{OUT}/short{i}.wav",
+                                    theme=s["theme"], ambience=cfg["ambience"], seed=int(rng.integers(1e6)))
+            pe = illustrateur.make_particles(s["theme"], 1080, 1920, int(rng.integers(1e6)))
+            frames = illustrateur.short_frames(s["theme"], pe, s["hook"], s["overlay"], monteur.FPS, s["seconds"], n_loop)
+            monteur.encode(frames, f"{OUT}/short{i}.mp4", gop=monteur.FPS * 2, audio=f"{OUT}/short{i}.wav", crf=20)
+            short_metas.append(redacteur.short_meta(rng, s, used_titles, cfg["extra_tags"]))
+
 
     # ---------- Contrôles ----------
     log("Gardien des règles + Contrôleur qualité")
@@ -64,7 +95,7 @@ def main():
     results.append(dict(type="Vidéo longue", titre=long_meta["title"], problemes=p, infos=info,
                         fichier=f"{OUT}/long.mp4", meta=long_meta, thumb=f"{OUT}/long_thumbnail.png"))
     for i, m in enumerate(short_metas, 1):
-        p, info = controleur_qualite.check_video(f"{OUT}/short{i}.mp4", SHORT_SECONDS, vertical=True)
+        p, info = controleur_qualite.check_video(f"{OUT}/short{i}.mp4", short_durs[i - 1] if i <= len(short_durs) else SHORT_SECONDS, vertical=True)
         results.append(dict(type=f"Short {i}", titre=m["title"], problemes=p, infos=info,
                             fichier=f"{OUT}/short{i}.mp4", meta=m, thumb=None))
 
@@ -90,7 +121,7 @@ def main():
 
     # ---------- Mémoire + rapport ----------
     mem.add_day(dict(date=date,
-                     long=dict(title=long_meta["title"], theme=plan["long_theme"],
+                     long=dict(title=long_meta["title"], theme=plan["long_theme"], story=story["id"] if story else None, episode=episode if story else None,
                                originals=[t["item"][1] for t in plan["tracks"] if t["item"][0] == "orig"],
                                video_id=results[0].get("video_id")),
                      shorts=[dict(title=m["title"], theme=s["theme"], song=s["name"], video_id=r.get("video_id"))
@@ -99,7 +130,7 @@ def main():
     if os.environ.get("GITHUB_STEP_SUMMARY"):
         open(os.environ["GITHUB_STEP_SUMMARY"], "a").write(report)
     for d in os.listdir(OUT):
-        if d.startswith("frames") or d.endswith(".wav") or d.endswith("_loop.mp4"):
+        if d.endswith((".wav", ".ts", ".txt", ".ass")):
             shutil.rmtree(f"{OUT}/{d}", ignore_errors=True) if os.path.isdir(f"{OUT}/{d}") else os.remove(f"{OUT}/{d}")
     log("Directeur : journée terminée")
     print(report)

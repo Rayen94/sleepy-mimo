@@ -1,8 +1,34 @@
 # Sleepy Mimo — ton équipe YouTube automatique
 
-Chaque nuit, ce système produit **1 vidéo longue (≈30 min) + 3 Shorts** pour ta chaîne, les contrôle,
+Chaque nuit, ce système produit **1 vidéo longue (≈1 h, Full HD) + 3 Shorts** pour ta chaîne, les contrôle,
 puis les envoie sur YouTube **en privé**. Le matin, tu les regardes et tu les passes en public (5 minutes).
 Il tourne gratuitement dans le cloud sur GitHub Actions, même quand ton ordinateur est éteint.
+
+## Ce que font les vidéos (version 5) — la série « Sleepy Mimo »
+- **Une vraie série** : chaque vidéo longue est un épisode numéroté (Saison 1 : 12 épisodes écrits, diffusés dans l'ordre),
+  avec le générique « Sleepy Mimo – Episode N » et une fin « See you in the next episode! ».
+- **8 personnages** : Mimo, Luna la chouette, Pip le lapin, Twinkle l'étoile, Wooly l'agneau, Mia le chaton, Dot le caneton, Finn le renard.
+- **Voix naturelles** (moteur Kokoro, gratuit) : chaque personnage a sa voix. Mimo chante les comptines avec cette voix.
+- **Vrais instruments** (banque FluidR3 + FluidSynth) : boîte à musique, piano, harpe, cordes, basse, flûte, petites percussions.
+- **Shorts = la suite de l'épisode** : l'histoire du jour découpée en Part 1, 2, 3, en vertical, avec « To be continued... »
+  et « Watch the full episode! ».
+- Le modèle de voix (≈120 Mo) est téléchargé automatiquement par GitHub la première fois, puis gardé en mémoire.
+
+## Ce que font les vidéos (version 4)
+- **Une histoire chaque jour** (en anglais) : Mimo et ses amis (Luna la chouette, Pip le lapin, Twinkle l'étoile,
+  Wooly l'agneau) parlent avec leurs propres voix, dans des décors colorés. L'histoire mène à une comptine.
+- **Comptines chantées** par la voix de Mimo, avec les **paroles en karaoké** à l'écran et une **scène dédiée** par comptine.
+- **Intro « Sleepy Mimo »** au début de chaque vidéo longue. Image **Full HD, 30 images par seconde**.
+
+## Ce que font les vidéos (version 2)
+- **Vidéo longue d'1 h en 1080p** : Mimo passe par plusieurs décors (un toutes les 15 min) avec de doux fondus,
+  et l'instrument change avec le décor.
+- **Animation vivante** : Mimo respire, ses « Zzz » s'envolent, la lune brille, les nuages dérivent,
+  des étoiles filantes passent, la caméra bouge doucement.
+- **Musique plus riche** : mélodie + accords + basse douce + contre-mélodie en arpège, jeu « humain »,
+  et sons d'ambiance selon le décor (bruit blanc doux, vagues, pluie, vent, nuit).
+- **Shorts accrocheurs** : zoom d'ouverture, grosse phrase d'accroche qui apparaît dès la 1re seconde,
+  légende, puis « More lullabies with Mimo » à la fin.
 
 ## L'équipe (12 agents)
 

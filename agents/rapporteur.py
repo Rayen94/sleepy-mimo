@@ -11,7 +11,7 @@ def write(date, results, guard_issues, guard_notes, analytics, uploaded, path):
     for r in results:
         etat = "envoyée en PRIVÉ sur la chaîne" if r.get("video_id") else ("bloquée" if r["problemes"] else "prête (non envoyée)")
         L.append(f"- **{r['type']}** — {r['titre']}  ")
-        L.append(f"  Durée : {r['infos'].get('duree', '?')} s · Son moyen : {r['infos'].get('volume_moyen', '?')} dB · État : {etat}")
+        L.append(f"  Résolution : {r['infos'].get('resolution', '?')} · Durée : {r['infos'].get('duree', '?')} s · Son moyen : {r['infos'].get('volume_moyen', '?')} dB · État : {etat}")
         if r.get("video_id"):
             L.append(f"  Lien : https://studio.youtube.com/video/{r['video_id']}/edit")
         for p in r["problemes"]:

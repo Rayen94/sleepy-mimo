@@ -47,13 +47,19 @@ def load(path="consignes.yml"):
     cfg = dict(
         pause=str(raw.get("pause", "non")).lower() in OUI or raw.get("pause") is True,
         upload=(str(raw.get("envoyer_sur_youtube", "oui")).lower() in OUI) or raw.get("envoyer_sur_youtube") is True,
-        long_minutes=num("duree_video_longue_minutes", 30, 5, 180),
+        long_minutes=num("duree_video_longue_minutes", 60, 5, 180),
+        scene_minutes=num("changer_de_decor_toutes_les_minutes", 15, 5, 180),
+        ambience=not (str(raw.get("sons_ambiance", "oui")).lower() in {"non", "no", "false"} or raw.get("sons_ambiance") is False),
+        hooks=[],
+        story=not (str(raw.get("histoire", "oui")).lower() in {"non", "no", "false"} or raw.get("histoire") is False),
+        vocals=not (str(raw.get("voix_chantee", "oui")).lower() in {"non", "no", "false"} or raw.get("voix_chantee") is False),
+        intro=not (str(raw.get("intro_sleepy_mimo", "oui")).lower() in {"non", "no", "false"} or raw.get("intro_sleepy_mimo") is False),
         short_seconds=num("duree_shorts_secondes", 45, 15, 170),
         n_shorts=int(num("nombre_shorts", 3, 0, 5)),
         themes=mapped("decors_autorises", DECORS, set(DECORS.values())),
         voices=mapped("instruments_autorises", INSTRUMENTS, INSTRUMENTS.values()),
         songs=mapped("comptines_autorisees", COMPTINES, COMPTINES.values()),
-        original_pct=num("pourcentage_originales", 50, 0, 100),
+        original_pct=num("pourcentage_originales", 35, 0, 100),
         extra_tags=[str(t) for t in (raw.get("tags_en_plus") or [])][:10],
         overlays=[],
         long_theme=None,
@@ -68,6 +74,13 @@ def load(path="consignes.yml"):
             cfg["overlays"].append([str(t[0]), str(t[1])])
         else:
             warnings.append(f"Texte de Short « {t} » ignoré (il faut 2 lignes de 22 caractères maximum).")
+    for t in raw.get("accroches_shorts") or []:
+        if isinstance(t, list) and len(t) == 2 and all(len(str(x)) <= 18 for x in t):
+            cfg["hooks"].append([str(t[0]), str(t[1])])
+        else:
+            warnings.append(f"Accroche « {t} » ignorée (il faut 2 lignes de 18 caractères maximum).")
+    if not cfg["hooks"]:
+        cfg["hooks"] = [["Shhh...", "Mimo is sleeping"], ["Play this for", "your baby"], ["Bedtime with", "Mimo"]]
     if not cfg["overlays"]:
         cfg["overlays"] = [["Sleep tight,", "little one"], ["Time to sleep,", "little star"]]
     for k in ("LONG_MINUTES", "SHORT_SECONDS"):
