@@ -198,4 +198,153 @@ EP2 = dict(id="s1e02", title="Dot's First Swim", chapters=[
        ("narrator", "Find out in the next episode: Mia's Missing Ribbon!")]))
 
 
-LONG_EPISODES = {"s1e01": EP1, "s1e02": EP2}
+EP3 = dict(id="s1e03", title="Mia's Missing Ribbon", chapters=[
+    dict(label="The Windy Night", story=[
+        dict(decor="forest", cast=[("kitten", 640, 640, L)], lines=[
+            ("narrator", "It was a windy, whooshy night in the rainbow forest."),
+            ("kitten", "Meow! Look at my pink ribbon. It's my very favorite thing in the whole world."),
+            ("narrator", "But then, a big gust of wind came rushing through the trees. Whoooosh!"),
+            ("kitten", "Oh no! My ribbon! Come back! Come back!")]),
+        dict(decor="forest", cast=[("kitten", 420, 420, L), ("mimo", 1450, 760, R), ("bunny", 1600, 980, R)], lines=[
+            ("mimo", "Mia! We heard you calling. What happened?"),
+            ("kitten", "The wind took my pink ribbon, Mimo. It flew up, up, up, and now it's gone."),
+            ("bunny", "Don't cry, Mia. We'll find it! Hop hop, I'm a super finder!"),
+            ("mimo", "But it's so dark. How can we see where it went?"),
+            ("narrator", "Just then, a soft golden light began to twinkle above the trees."),
+            ("star", "Twinkle, twinkle! Did somebody need a little light?")]),
+        dict(decor="forest", cast=[("kitten", 420, 420, L), ("mimo", 760, 760, R), ("star", 1450, 1040, R)], lines=[
+            ("kitten", "Twinkle! Did you see a pink ribbon flying in the sky?"),
+            ("star", "I did! It flew toward the sparkly river. I'll light the way for you."),
+            ("mimo", "Thank you, Twinkle! Let's sing your song, so you shine extra bright!")]),
+    ], song=dict(name="Twinkle Twinkle Little Star", decor="forest", cast=[("kitten", 300, L), ("mimo", 520, L), ("bunny", 740, R), ("star", 980, R)], voice="box", transpose=0)),
+
+    dict(label="A Clue in the River", story=[
+        dict(decor="river", cast=[("mimo", -150, 320, L), ("kitten", -330, 530, L), ("fish", 1450, 920, R)], lines=[
+            ("narrator", "Following Twinkle's light, the friends arrived at the sparkly river."),
+            ("fish", "Blub, blub! Hello, friends! What are you doing out so late?"),
+            ("mimo", "Bubbles! We're looking for Mia's pink ribbon. Have you seen it?"),
+            ("fish", "Yes! A pink ribbon floated over the water, like a little flying fish!"),
+            ("fish", "The wind carried it to the other side of the river. Toward the flower meadow."),
+            ("kitten", "The other side? But I can't swim! Cats don't like getting wet!"),
+            ("mimo", "Don't worry, Mia. We'll take the little boat.")]),
+        dict(decor="river", boat=True, cast=[("mimo", 560, 560, L), ("kitten", 730, 730, R)], lines=[
+            ("kitten", "Meow... the boat is wobbly. I'm a little nervous."),
+            ("mimo", "Hold on tight, Mia. If we row together, and sing together, we'll be across in no time!")]),
+    ], song=dict(name="Row Row Row Your Boat", decor="river", boat=True, cast=[("mimo", 560, L), ("kitten", 730, R)], voice="harp", transpose=2)),
+
+    dict(label="The Broken Bridge", story=[
+        dict(decor="meadow", cast=[("mimo", -150, 330, L), ("kitten", -330, 140, L), ("duck", 1450, 780, R)], lines=[
+            ("narrator", "In the flower meadow, they met Dot the duckling."),
+            ("duck", "Quack! Look what I found! Is this your ribbon, Mia?"),
+            ("kitten", "Hmm... no, Dot. That's a pink flower petal. But thank you for looking!"),
+            ("duck", "Oops! Quack, quack. Silly me."),
+            ("mimo", "Dot, did you see anything pink flying by?"),
+            ("duck", "Yes! Something pink went over the little stream, toward the lantern hill. But the little bridge is broken!")]),
+        dict(decor="meadow", cast=[("mimo", 330, 330, L), ("kitten", 140, 140, L), ("duck", 780, 780, R), ("fox", 1450, 1040, R)], lines=[
+            ("fox", "Did somebody say broken bridge? Finn the fox, super builder, at your service!"),
+            ("mimo", "Finn! Can you help us fix it?"),
+            ("fox", "Of course! But it's a big job. I'll need everyone's help."),
+            ("kitten", "I'll find the flat stones."),
+            ("duck", "I'll carry the little sticks!"),
+            ("fox", "Then let's build it together. Everybody, sing the building song!")]),
+    ], song=dict(name="London Bridge", decor="meadow", cast=[("fox", 260, L), ("kitten", 480, L), ("mimo", 700, R), ("duck", 920, R)], voice="soft", transpose=0)),
+
+    dict(label="Found It!", story=[
+        dict(decor="night", cast=[("mimo", -150, 320, L), ("kitten", -330, 130, L), ("lamb", 900, 900, R)], lines=[
+            ("narrator", "Across the new bridge, at the top of the lantern hill, someone was waiting."),
+            ("lamb", "Baa! Hello, friends! Look at me! A pink ribbon fell from the sky, right onto my wool!"),
+            ("kitten", "My ribbon! Wooly, you found it!"),
+            ("lamb", "Oh! It's yours, Mia? I thought it was a present from the wind. Here, you can have it back."),
+            ("narrator", "Mia looked at her ribbon. Then she looked at Wooly, who looked so happy and so fancy."),
+            ("kitten", "Wooly... you can wear it tonight. It looks lovely on you. Sharing makes me happy too."),
+            ("lamb", "Really? Thank you, Mia! You're the kindest kitten ever!"),
+            ("mimo", "Hooray! Let's sing Wooly's favorite song, for the fanciest lamb on the hill!")]),
+    ], song=dict(name="Mary Had a Little Lamb", decor="night", cast=[("kitten", 240, L), ("lamb", 460, L), ("mimo", 680, R), ("fox", 900, R), ("duck", 1100, R)], voice="bell", transpose=0)),
+
+    dict(label="A Kind Goodnight", story=[
+        dict(decor="night", cast=[("mimo", 330, 330, L), ("kitten", 560, 560, L), ("owl", 1450, 900, R)], lines=[
+            ("owl", "Hoo hoo. I saw everything from my tree, little Mia. You were very kind tonight."),
+            ("kitten", "Thank you, Luna. My ribbon went on a big adventure. And so did I!"),
+            ("mimo", "And we did it all together. Friends, Twinkle, Bubbles, the boat and the bridge!"),
+            ("owl", "Now, it's time to rest. Lie down on the soft grass, and listen to the wind sing you to sleep."),
+            ("narrator", "The wind was gentle now. It whispered through the trees, like a lullaby."),
+            ("narrator", "And one by one, the friends closed their eyes. Goodnight, Mia. Goodnight, Wooly. Goodnight, everyone.")]),
+    ], song=None),
+], finale=dict(decor="night", cast=[("bunny", 230, L), ("kitten", 440, L), ("lamb", 650, L), ("mimo", 860, R), ("fox", 1070, R)], minutes=12),
+   teaser=dict(decor="forest", cast=[("owl", -150, 600, L)], lines=[
+       ("narrator", "Next time, on Sleepy Mimo..."),
+       ("owl", "Hoo hoo! Oh no! My bedtime bell... it won't ring! Not a single ding, not a single dong!"),
+       ("narrator", "If the bedtime bell can't ring, how will everyone know it's time to sleep?"),
+       ("narrator", "Find out in the next episode: The Bedtime Bell!")]))
+
+
+EP4 = dict(id="s1e04", title="The Bedtime Bell", chapters=[
+    dict(label="The Silent Bell", story=[
+        dict(decor="forest", cast=[("owl", 640, 640, L)], lines=[
+            ("narrator", "Every night, in the rainbow forest, Luna the owl rings the bedtime bell. Ding, dang, dong!"),
+            ("owl", "Hoo hoo! Time to ring the bell. One, two, three..."),
+            ("narrator", "But tonight... nothing. Not a single ding. Not a single dong."),
+            ("owl", "Oh no! My bell won't ring! How will everyone know it's time to sleep?")]),
+        dict(decor="forest", cast=[("owl", 420, 420, L), ("mimo", 1450, 760, R), ("bunny", 1600, 980, R)], lines=[
+            ("mimo", "Luna! We were waiting for the bell, but it never rang. Is everything okay?"),
+            ("owl", "My bell is silent, Mimo. I don't know why."),
+            ("bunny", "Maybe something is stuck inside! Let's take a peek!"),
+            ("narrator", "Very carefully, they peeked inside the big golden bell. And there, in a tiny nest of moss..."),
+            ("bunny", "Oh! Look! Three teeny, tiny lights! They're baby fireflies, and they're fast asleep!"),
+            ("owl", "Hoo hoo. They made their nest inside my bell. If I ring it, I'll wake them up."),
+            ("mimo", "Shhh. Let's sing them a soft song, so they keep dreaming.")]),
+    ], song=dict(name="Twinkle Twinkle Little Star", decor="forest", cast=[("bunny", 330, L), ("owl", 600, L), ("mimo", 880, R)], voice="box", transpose=-2)),
+
+    dict(label="Bubble Bells", story=[
+        dict(decor="forest", cast=[("owl", 420, 420, L), ("mimo", 760, 760, R), ("bunny", 980, 980, R)], lines=[
+            ("owl", "But now we have a problem. Without the bell, nobody will know it's bedtime."),
+            ("mimo", "I have an idea! We'll go and tell all our friends, ourselves!"),
+            ("bunny", "Yes! We'll be the bedtime bell! Hop hop, let's go!")]),
+        dict(decor="river", cast=[("mimo", -150, 330, L), ("bunny", -330, 140, L), ("fish", 1450, 920, R), ("duck", 1600, 640, R)], lines=[
+            ("fish", "Blub, blub! Hello, friends! I didn't hear the bedtime bell tonight."),
+            ("duck", "Quack! Me neither! Is it still playtime?"),
+            ("mimo", "The bell can't ring tonight, so we're telling everyone: it's bedtime!"),
+            ("fish", "I can help! Listen. I can make bubble bells. Blub-ding! Blub-dong!"),
+            ("duck", "Quack, that's so funny! Bubble bells!"),
+            ("bunny", "Let's cross the river and tell the others. Everybody in the boat!")]),
+    ], song=dict(name="Row Row Row Your Boat", decor="river", boat=True, cast=[("mimo", 560, L), ("bunny", 730, R)], voice="harp", transpose=2)),
+
+    dict(label="Wooly's Idea", story=[
+        dict(decor="meadow", cast=[("mimo", -150, 300, L), ("bunny", -330, 120, L), ("lamb", 1450, 760, R), ("kitten", 1600, 980, R)], lines=[
+            ("narrator", "In the flower meadow, Wooly and Mia were still playing tag."),
+            ("kitten", "Meow! Mimo! We didn't hear the bell. Is it time for bed?"),
+            ("mimo", "Yes! The bell is silent tonight, because baby fireflies are sleeping inside."),
+            ("lamb", "Baa! Baby fireflies? How cute! But how will the whole land know it's bedtime?"),
+            ("lamb", "Oh, I know! When my mommy wants me to come home, she sings my song. Everyone knows it!"),
+            ("kitten", "Let's sing it really loud, so all the little ones hear it!")]),
+    ], song=dict(name="Mary Had a Little Lamb", decor="meadow", cast=[("bunny", 220, L), ("lamb", 440, L), ("mimo", 660, R), ("kitten", 880, R), ("duck", 1090, R)], voice="bell", transpose=0)),
+
+    dict(label="We Are the Bell!", story=[
+        dict(decor="night", cast=[("mimo", -150, 330, L), ("lamb", -330, 140, L), ("owl", 1450, 900, R), ("fox", 1600, 640, R)], lines=[
+            ("narrator", "At last, everyone gathered on the lantern hill."),
+            ("fox", "Hey, everyone! I heard singing all over the land. What's going on?"),
+            ("owl", "Hoo hoo. Tonight, my friends, we will be the bedtime bell. All of us, together."),
+            ("mimo", "We'll sing the bell song! The one that goes ding, dang, dong!"),
+            ("fox", "Great idea! When we sing together, we're even louder than a bell!"),
+            ("owl", "But softly, so we don't wake the baby fireflies. Ready? One, two, three!")]),
+    ], song=dict(name="Are You Sleeping (Frère Jacques)", decor="night", cast=[("bunny", 200, L), ("fox", 400, L), ("mimo", 600, L), ("owl", 820, R), ("lamb", 1040, R)], voice="bell", transpose=0)),
+
+    dict(label="Thank You, Fireflies", story=[
+        dict(decor="forest", cast=[("owl", 420, 420, L), ("mimo", 760, 760, R)], lines=[
+            ("narrator", "Back at the big golden bell, something wonderful was happening."),
+            ("narrator", "The three baby fireflies had woken up, and they were glowing brighter than ever."),
+            ("owl", "Hoo hoo. Look, Mimo. They heard your song. Now they're ready for their first flight."),
+            ("narrator", "And up they flew, like three tiny stars, all the way into the sky."),
+            ("mimo", "Goodbye, little fireflies! Now Luna's bell can ring again!"),
+            ("owl", "Tomorrow, it will ring. But tonight, your song was the most beautiful bell of all."),
+            ("mimo", "Goodnight, Luna. Goodnight, fireflies. Goodnight, everyone.")]),
+    ], song=None),
+], finale=dict(decor="night", cast=[("bunny", 230, L), ("fox", 440, L), ("mimo", 650, L), ("lamb", 860, R), ("kitten", 1070, R)], minutes=12),
+   teaser=dict(decor="meadow", cast=[("fox", -150, 600, L)], lines=[
+       ("narrator", "Next time, on Sleepy Mimo..."),
+       ("fox", "I'm going to build the biggest bridge ever! All by myself! Nobody can help me!"),
+       ("narrator", "But what happens when Finn's bridge keeps falling down?"),
+       ("narrator", "Find out in the next episode: Finn Learns to Share!")]))
+
+
+LONG_EPISODES = {"s1e01": EP1, "s1e02": EP2, "s1e03": EP3, "s1e04": EP4}

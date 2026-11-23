@@ -4,6 +4,17 @@ Chaque nuit, ce système produit **1 vidéo longue (≈1 h, Full HD) + 3 Shorts*
 puis les envoie sur YouTube **en privé**. Le matin, tu les regardes et tu les passes en public (5 minutes).
 Il tourne gratuitement dans le cloud sur GitHub Actions, même quand ton ordinateur est éteint.
 
+## Ce que font les vidéos (version 6) — des épisodes où l'histoire dure toute la vidéo
+- **Épisode en chapitres** : intro → histoire → chanson → suite de l'histoire → chanson… → tout le monde s'endort
+  (12 min de berceuses) → au revoir → **bande-annonce du prochain épisode** (« Next time on Sleepy Mimo... »).
+- **Les personnages chantent et dansent** pendant les comptines, dans le décor de l'histoire, paroles en karaoké.
+- **Caméra de dessin animé** : plans larges, plans à deux, gros plans sur celui qui parle, travellings ; les personnages
+  regardent celui qui parle, sautent de joie, font des gestes ; premier plan et vignettage pour la profondeur.
+- **Nouveau personnage** : Bubbles, le gros poisson timide de la rivière.
+- Épisodes déjà écrits dans ce format : 1, 2 et 3 (les suivants arrivent).
+- **Refaire un épisode** : Actions → Run workflow → champ « episode » (ex. 1) et « shorts » (ex. 0).
+- La production automatique tourne chaque jour vers **10h23** (après la remise à zéro du quota YouTube).
+
 ## Ce que font les vidéos (version 5) — la série « Sleepy Mimo »
 - **Une vraie série** : chaque vidéo longue est un épisode numéroté (Saison 1 : 12 épisodes écrits, diffusés dans l'ordre),
   avec le générique « Sleepy Mimo – Episode N » et une fin « See you in the next episode! ».

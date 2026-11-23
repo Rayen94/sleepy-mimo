@@ -2,7 +2,7 @@ name: Sleepy Mimo - production quotidienne
 
 on:
   schedule:
-    - cron: "23 23 * * *"   # tous les jours vers 0h23 à Paris (hors de l'heure pile, moins de retard)
+    - cron: "23 9 * * *"    # tous les jours vers 10h23 à Paris (après la remise à zéro du quota YouTube)
   workflow_dispatch:       # bouton « Run workflow » pour lancer à la main
     inputs:
       episode:
@@ -33,11 +33,31 @@ jobs:
           python-version: "3.12"
 
       - name: Installer les outils
+        timeout-minutes: 20
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y -q ffmpeg libcairo2 libass9 espeak-ng mbrola mbrola-us1 mbrola-us3 fluidsynth fluid-soundfont-gm
+          sudo apt-get install -y -q --no-install-recommends -o Acquire::Retries=5 ffmpeg libcairo2 libass9 espeak-ng mbrola mbrola-us1 mbrola-us3 fluidsynth
           mkdir -p ~/.fonts && cp fonts/Fredoka.ttf ~/.fonts/ && fc-cache -f
           pip install -q -r requirements.txt
+
+      - name: Garder la banque d'instruments en mémoire
+        uses: actions/cache@v4
+        with:
+          path: sf2
+          key: soundfont-fluidr3-v1
+
+      - name: Télécharger la banque de vrais instruments (une seule fois)
+        timeout-minutes: 15
+        continue-on-error: true
+        run: |
+          if [ ! -s sf2/FluidR3_GM.sf2 ]; then
+            cd /tmp
+            apt-get download -o Acquire::Retries=5 fluid-soundfont-gm
+            dpkg-deb -x fluid-soundfont-gm*.deb sfx
+            mkdir -p "$GITHUB_WORKSPACE/sf2"
+            cp sfx/usr/share/sounds/sf2/FluidR3_GM.sf2 "$GITHUB_WORKSPACE/sf2/"
+          fi
+          ls -la "$GITHUB_WORKSPACE/sf2"
 
       - name: Garder le modèle de voix en mémoire
         uses: actions/cache@v4
@@ -46,6 +66,7 @@ jobs:
           key: kokoro-v1.0
 
       - name: Télécharger le modèle de voix naturelles (une seule fois)
+        timeout-minutes: 15
         run: |
           mkdir -p models
           B=https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0
@@ -74,6 +95,15 @@ jobs:
         run: |
           git config user.name "Sleepy Mimo Bot"
           git config user.email "bot@users.noreply.github.com"
-          git add history.json reports/ || true
-          git commit -m "Rapport du $(date -u +%F)" || echo "Rien à enregistrer"
-          git push || echo "Push impossible"
+          mkdir -p /tmp/save && cp history.json /tmp/save/ 2>/dev/null || true
+          cp -r reports /tmp/save/ 2>/dev/null || true
+          for i in 1 2 3; do
+            git fetch -q origin main
+            git checkout -q -f -B main origin/main
+            python3 merge_history.py /tmp/save/history.json history.json
+            cp -r /tmp/save/reports/. reports/ 2>/dev/null || true
+            git add history.json reports/ || true
+            git commit -q -m "Rapport du $(date -u +%F)" || { echo "Rien à enregistrer"; break; }
+            git push -q origin main && break
+            sleep 5
+          done

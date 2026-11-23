@@ -5,7 +5,7 @@ import os, subprocess, tempfile, wave
 import numpy as np
 
 SR = 44100
-SOUNDFONT = next((p for p in ["/usr/share/sounds/sf2/FluidR3_GM.sf2", "/usr/share/sounds/sf2/default-GM.sf2"] if os.path.exists(p)), None)
+SOUNDFONT = next((p for p in ["sf2/FluidR3_GM.sf2", "/usr/share/sounds/sf2/FluidR3_GM.sf2", "/usr/share/sounds/sf2/default-GM.sf2"] if os.path.exists(p)), None)
 # instrument de la mélodie (numéros General MIDI)
 MELODY = {"box": 10, "soft": 0, "harp": 46, "bell": 8}
 CHORDS = {'C': [0, 4, 7], 'F': [5, 9, 12], 'G': [7, 11, 14], 'Am': [9, 12, 16]}
