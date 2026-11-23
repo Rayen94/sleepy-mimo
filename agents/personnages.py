@@ -4,8 +4,8 @@ Chaque fonction dessine le personnage centré en (0, 0) (les pieds vers y=+130),
 mouth : ouverture de la bouche (0 à 1), blink : yeux fermés, walk : phase de marche (0 à 1), wave : bras levé."""
 import math
 
-NAMES = {"mimo": "Mimo", "owl": "Luna", "bunny": "Pip", "star": "Twinkle", "lamb": "Wooly", "kitten": "Mia", "duck": "Dot", "fox": "Finn"}
-SPECIES = {"mimo": "little bear", "owl": "owl", "bunny": "bunny", "star": "little star", "lamb": "little lamb", "kitten": "kitten", "duck": "duckling", "fox": "fox"}
+NAMES = {"fish": "Bubbles", "mimo": "Mimo", "owl": "Luna", "bunny": "Pip", "star": "Twinkle", "lamb": "Wooly", "kitten": "Mia", "duck": "Dot", "fox": "Finn"}
+SPECIES = {"fish": "big fish", "mimo": "little bear", "owl": "owl", "bunny": "bunny", "star": "little star", "lamb": "little lamb", "kitten": "kitten", "duck": "duckling", "fox": "fox"}
 
 
 def _eyes(xl, xr, y, r, blink, look=0.0, col="#2B1A12"):
@@ -181,7 +181,22 @@ def fox(mouth=0.0, blink=False, walk=0.0, wave=0.0, look=0.0):
 </g>'''
 
 
-DRAW = {"mimo": mimo, "owl": owl, "bunny": bunny, "star": star, "lamb": lamb, "kitten": kitten, "duck": duck, "fox": fox}
+def fish(mouth=0.0, blink=False, walk=0.0, wave=0.0, look=0.0):
+    """Bubbles regarde vers la droite par défaut (sens = -1 pour regarder à gauche)."""
+    fin = 10 * math.sin(2 * math.pi * walk + 1) + 20 * wave
+    return f'''<g>
+<path d="M-60 40 L-130 {0 - fin*0.3:.1f} L-130 {90 + fin*0.3:.1f}Z" fill="#3FA7D6"/>
+<ellipse cx="0" cy="45" rx="90" ry="70" fill="#5EC8F2"/>
+<ellipse cx="10" cy="70" rx="60" ry="34" fill="#BFEFFF"/>
+<path d="M10 -20 Q-20 {-60 - fin:.1f} -50 -18Z" fill="#3FA7D6"/>
+<g fill="#FFFFFF" opacity="0.5"><circle cx="-20" cy="30" r="10"/><circle cx="-44" cy="52" r="8"/><circle cx="-24" cy="70" r="7"/></g>
+{_eyes(18, 52, 20, 11, blink, look)}
+{_mouth(58, 58, 12, mouth, "#2E6F9E")}
+<circle cx="70" cy="44" r="10" fill="#FF9EB0" opacity="0.6"/>
+</g>'''
+
+
+DRAW = {"fish": fish, "mimo": mimo, "owl": owl, "bunny": bunny, "star": star, "lamb": lamb, "kitten": kitten, "duck": duck, "fox": fox}
 
 
 def draw(name, x, y, s, mouth=0.0, blink=False, walk=0.0, wave=0.0, facing=1, look=0.0, **kw):

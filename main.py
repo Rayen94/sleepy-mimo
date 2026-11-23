@@ -39,8 +39,23 @@ def main():
     log(f"Compositeur + Chanteur : {len(plan['tracks'])} morceaux dont {sung} chantés "
         f"({len(plan['scene_themes'])} décors : {', '.join(plan['scene_themes'])})")
     story, outro = None, None
-    episode = mem.next_episode()
-    if plan.get("story"):
+    episode = int(os.environ.get("EPISODE_OVERRIDE") or 0) or mem.next_episode()
+    from agents.episodes_longs import LONG_EPISODES
+    from agents.saison1 import EPISODES
+    if plan.get("story") and os.environ.get("EPISODE_OVERRIDE"):
+        plan["story"] = EPISODES[(episode - 1) % len(EPISODES)]
+    long_ep = LONG_EPISODES.get(plan["story"]["id"]) if plan.get("story") else None
+    if long_ep:
+        # Épisode long : l'histoire dure toute la vidéo (chapitres + chansons des personnages + berceuses)
+        from agents import showrunner
+        log(f"Showrunner : épisode {episode} « {long_ep['title']} » ({len(long_ep['chapters'])} chapitres)")
+        res = showrunner.build(long_ep, episode, rng, f"{OUT}/long.mp4", OUT, log=log)
+        total = res["total"]
+        story = dict(title=long_ep["title"], id=long_ep["id"], shots=res["story_shots"], total=res["story_total"],
+                     audio=res["story_audio"], seed=int(rng.integers(1e6)), episode=episode)
+        long_meta = redacteur.episode_meta(rng, long_ep, episode, res, used_titles, cfg["extra_tags"])
+        miniaturiste.make_episode(long_ep, episode, f"{OUT}/long_thumbnail.png")
+    if not long_ep and plan.get("story"):
         st = plan["story"]
         log(f"Scénariste + Comédiens : histoire « {st['title']} »")
         s_audio, s_shots, s_subs, s_total = histoires.build(st, rng, compositeur.track_spec(("orig", "story"), rng))
@@ -49,16 +64,17 @@ def main():
                      card=f"Episode {episode}: {st['title']}", raw=st)
         o_audio, o_shots, o_subs, o_total = histoires.outro(st, rng)
         outro = dict(shots=o_shots, subs=o_subs, total=o_total, audio=o_audio, seed=int(rng.integers(1e6)))
-    stamps, total, karaoke = compositeur.build_long(plan["tracks"], rng, f"{OUT}/long.wav", ambience=cfg["ambience"],
-                                                    intro=5.0 if cfg["intro"] else 0.0, vocals=cfg["vocals"],
-                                                    story_audio=story["audio"] if story else None,
-                                                    outro_audio=outro["audio"] if outro else None)
-    if outro:
-        outro["start"] = total - outro["total"]
-    realisateur.build_long(stamps, total, f"{OUT}/long.wav", f"{OUT}/long.mp4", OUT, rng, karaoke, log=log, story=story,
-                           outro=outro, episode=episode if story else None)
-    long_meta = redacteur.long_meta(rng, plan, stamps, total, used_titles, cfg["extra_tags"], sung=bool(karaoke), story=story)
-    miniaturiste.make(plan["long_theme"], int(round(total / 60)), f"{OUT}/long_thumbnail.png", int(rng.integers(1e6)))
+    if not long_ep:
+      stamps, total, karaoke = compositeur.build_long(plan["tracks"], rng, f"{OUT}/long.wav", ambience=cfg["ambience"],
+                                                      intro=5.0 if cfg["intro"] else 0.0, vocals=cfg["vocals"],
+                                                      story_audio=story["audio"] if story else None,
+                                                      outro_audio=outro["audio"] if outro else None)
+      if outro:
+          outro["start"] = total - outro["total"]
+      realisateur.build_long(stamps, total, f"{OUT}/long.wav", f"{OUT}/long.mp4", OUT, rng, karaoke, log=log, story=story,
+                             outro=outro, episode=episode if story else None)
+      long_meta = redacteur.long_meta(rng, plan, stamps, total, used_titles, cfg["extra_tags"], sung=bool(karaoke), story=story)
+      miniaturiste.make(plan["long_theme"], int(round(total / 60)), f"{OUT}/long_thumbnail.png", int(rng.integers(1e6)))
 
     # ---------- Shorts ----------
     short_metas, short_durs = [], []
@@ -110,8 +126,12 @@ def main():
                 if r["problemes"]:
                     continue
                 log(f"Publieur : envoi en privé — {r['titre']}")
-                r["video_id"], r["miniature"] = publieur.upload(yt, r["fichier"], r["meta"], r["thumb"])
-                uploaded = True
+                try:
+                    r["video_id"], r["miniature"] = publieur.upload(yt, r["fichier"], r["meta"], r["thumb"])
+                    uploaded = True
+                except Exception as e:          # ex. limite d'envois YouTube du jour atteinte : on garde la vidéo en téléchargement
+                    log(f"Publieur : envoi impossible ({str(e)[:200]})")
+                    r["problemes"].append("Envoi YouTube impossible aujourd'hui (limite d'envois atteinte ?). La vidéo reste téléchargeable dans GitHub.")
         try:
             analytics = analyste.stats(yt)
         except Exception as e:

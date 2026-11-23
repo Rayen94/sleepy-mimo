@@ -110,7 +110,7 @@ def ass_brand(start, dur, name, sub):
             f"Dialogue: 2,{ts(start + 1.0)},{ts(start + dur)},BrandSub,,0,0,0,,{{\\fad(500,500)\\pos(960,420)}}{sub}")
 
 
-SPEAKER_COLORS = {"mimo": "&H0070B0E8&", "owl": "&H00DB7B9A&", "bunny": "&H00C9A7F7&", "star": "&H005AD9FF&", "lamb": "&H00F2D0C9&", "kitten": "&H005AA6F2&", "duck": "&H0066E0FF&", "fox": "&H002A7AF0&"}
+SPEAKER_COLORS = {"mimo": "&H0070B0E8&", "owl": "&H00DB7B9A&", "bunny": "&H00C9A7F7&", "star": "&H005AD9FF&", "lamb": "&H00F2D0C9&", "kitten": "&H005AA6F2&", "duck": "&H0066E0FF&", "fox": "&H002A7AF0&", "fish": "&H00F2C85E&"}
 
 
 def ass_dialogue(start, end, who, text, name):

@@ -32,5 +32,7 @@ class Memory:
         return out
 
     def add_day(self, entry):
-        self.data["days"] = [d for d in self.data["days"] if d["date"] != entry["date"]] + [entry]
+        ep = entry.get("long", {}).get("episode")
+        self.data["days"] = [d for d in self.data["days"]
+                             if not (d["date"] == entry["date"] and d.get("long", {}).get("episode") == ep)] + [entry]
         json.dump(self.data, open(self.path, "w"), indent=1, ensure_ascii=False)

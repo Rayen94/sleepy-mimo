@@ -121,3 +121,36 @@ def short_story_meta(rng, story, part, parts, used_titles, extra_tags=()):
             "#shorts #bedtimestory #kids #lullaby")
     tags = ["sleepy mimo", "bedtime story", "story for kids", "kids cartoon", "shorts", "lullaby", t.lower()] + list(extra_tags)
     return dict(title=title, description=desc, tags=tags)
+
+
+EPISODE_TITLES = [
+    "Sleepy Mimo Episode {ep}: {story} 🌙 Bedtime Story with Songs for Kids",
+    "{story} ✨ Sleepy Mimo Episode {ep} | Story, Songs & Lullabies",
+    "Sleepy Mimo Ep. {ep} 😴 {story} | Bedtime Adventure & Nursery Rhymes",
+    "{story} 🌟 Episode {ep} | Sleepy Mimo Bedtime Story & Sing-Along",
+]
+
+
+def episode_meta(rng, ep, number, res, used_titles, extra_tags=()):
+    title = None
+    for i in rng.permutation(len(EPISODE_TITLES)):
+        cand = EPISODE_TITLES[i].format(ep=number, story=ep["title"])
+        if cand not in used_titles and len(cand) <= 100:
+            title = cand; break
+    title = title or f"Sleepy Mimo Episode {number}: {ep['title']} (#{len(used_titles) + 1})"
+    songs = [c["song"]["name"] for c in ep["chapters"] if c.get("song")]
+    chapters = "\n".join(f"{fmt(t)} {label}" for t, label in res["chapters"])
+    cast = sorted({c for ch in ep["chapters"] for sh in ch["story"] for (c, *_r) in sh["cast"]})
+    from .personnages import NAMES
+    names = ", ".join(NAMES[c] for c in cast if c in NAMES)
+    desc = (f"📺 Sleepy Mimo, episode {number}: {ep['title']}\n\n"
+            f"Join Mimo the little bear and his friends ({names}) in a cozy bedtime adventure! "
+            f"The story goes on all the way through the video, with songs sung by the characters "
+            f"and gentle lullabies at the end to help little ones fall asleep. 🌙\n\n"
+            f"🎵 Songs: {', '.join(dict.fromkeys(songs))} — lyrics on screen, sing along!\n\n"
+            "⏱️ Chapters\n" + chapters +
+            "\n\n💤 A new episode of the series every day. Subscribe so you don't miss what happens next!\n\n"
+            "#bedtimestory #lullaby #nurseryrhymes #kidssongs #sleepymimo")
+    tags = ["sleepy mimo", "bedtime story", "bedtime stories for kids", "nursery rhymes", "kids songs", "lullabies for babies",
+            "sing along", "kids cartoon", "story for kids", "baby sleep music", ep["title"].lower()] + [s.lower() for s in songs[:3]] + list(extra_tags)
+    return dict(title=title, description=desc, tags=tags[:30])

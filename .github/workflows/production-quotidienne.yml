@@ -4,6 +4,15 @@ on:
   schedule:
     - cron: "23 23 * * *"   # tous les jours vers 0h23 à Paris (hors de l'heure pile, moins de retard)
   workflow_dispatch:       # bouton « Run workflow » pour lancer à la main
+    inputs:
+      episode:
+        description: "Numéro d'épisode à (re)faire (vide = épisode suivant)"
+        required: false
+        default: ""
+      shorts:
+        description: "Nombre de Shorts (vide = comme dans consignes.yml)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -48,6 +57,8 @@ jobs:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          EPISODE_OVERRIDE: ${{ github.event.inputs.episode }}
+          SHORTS_OVERRIDE: ${{ github.event.inputs.shorts }}
         run: python main.py
 
       - name: Garder les vidéos en téléchargement (7 jours)

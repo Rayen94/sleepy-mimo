@@ -83,6 +83,8 @@ def load(path="consignes.yml"):
         cfg["hooks"] = [["Shhh...", "Mimo is sleeping"], ["Play this for", "your baby"], ["Bedtime with", "Mimo"]]
     if not cfg["overlays"]:
         cfg["overlays"] = [["Sleep tight,", "little one"], ["Time to sleep,", "little star"]]
+    if os.environ.get("SHORTS_OVERRIDE", "").strip().isdigit():
+        cfg["n_shorts"] = max(0, min(5, int(os.environ["SHORTS_OVERRIDE"])))
     for k in ("LONG_MINUTES", "SHORT_SECONDS"):
         if os.environ.get(k):  # pour les tests uniquement
             cfg["long_minutes" if k == "LONG_MINUTES" else "short_seconds"] = float(os.environ[k])

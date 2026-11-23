@@ -3,6 +3,11 @@ Coucher de soleil fleuri, forêt enchantée, pays des nuages et arc-en-ciel, cha
 import math, random
 
 GROUND = 600
+GROUND_BY = {"river": 518}
+
+
+def ground(decor):
+    return GROUND_BY.get(decor, GROUND)
 
 
 def _grad(gid, stops, vertical=True):
@@ -163,3 +168,43 @@ def night_hill(t, rng_seed=6):
 DECORS = {"meadow": meadow, "forest": forest, "clouds": cloudland, "bedroom": bedroom, "river": river, "night": night_hill}
 PLACE_NAMES = {"meadow": "the flower meadow", "forest": "the rainbow forest", "clouds": "the land of clouds",
                "river": "the sparkly river", "night": "the lantern hill", "bedroom": "Mimo's room"}
+
+
+def water_front(t):
+    """Bande d'eau devant Bubbles, pour qu'il nage à moitié dans la rivière."""
+    pts = [f"{1280*j/32:.1f},{592 + 6*math.sin(2*math.pi*(j/6 + t)):.1f}" for j in range(33)]
+    return (f'<path d="M0,720 L{" L".join(pts)} L1280,720Z" fill="#4AA3D2"/>'
+            f'<path d="M{" L".join(pts)}" stroke="#BFE3F2" stroke-width="4" fill="none" opacity="0.7"/>')
+
+
+def foreground(decor, t):
+    """Premier plan (devant les personnages) pour donner de la profondeur."""
+    if decor == "meadow":
+        out = []
+        for i, (x, y, sc, col) in enumerate([(40, 700, 2.6, "#FF6F91"), (130, 720, 2.0, "#B57BFF"), (1200, 705, 2.4, "#FFB347"), (1110, 725, 1.9, "#5EC8F2")]):
+            out.append(_flower(x, y, col, t, i * 1.3, sc))
+        out.append('<path d="M0 720 Q60 650 90 720Z M70 720 Q110 640 150 720Z M1150 720 Q1190 650 1220 720Z M1210 720 Q1250 640 1280 720Z" fill="#4E9A5A"/>')
+        return "".join(out)
+    if decor == "forest":
+        sw = 6 * math.sin(2 * math.pi * t)
+        return (f'<g fill="#3E8E5A"><circle cx="-20" cy="720" r="110"/><circle cx="90" cy="740" r="80"/><circle cx="1300" cy="720" r="110"/><circle cx="1190" cy="745" r="80"/></g>'
+                f'<g fill="#5FBF7A" opacity="0.9" transform="rotate({sw:.1f} 0 0)"><ellipse cx="60" cy="10" rx="120" ry="45"/><ellipse cx="0" cy="60" rx="70" ry="30"/></g>'
+                f'<g fill="#F28AB3" opacity="0.9" transform="rotate({-sw:.1f} 1280 0)"><ellipse cx="1220" cy="10" rx="120" ry="45"/><ellipse cx="1280" cy="60" rx="70" ry="30"/></g>')
+    if decor == "night":
+        out = ['<path d="M0 720 L0 680 Q30 640 50 690 Q70 630 95 690 Q120 650 140 720Z M1280 720 L1280 680 Q1250 640 1230 690 Q1210 630 1185 690 Q1160 650 1140 720Z" fill="#221E58"/>']
+        for i, (x, y) in enumerate([(90, 600), (1180, 620), (200, 660)]):
+            a = 0.4 + 0.6 * abs(math.sin(2 * math.pi * (2 * t + i / 3)))
+            out.append(f'<circle cx="{x}" cy="{y + 10*math.sin(2*math.pi*t + i):.1f}" r="12" fill="#FFF7A8" opacity="{a*0.3:.2f}"/>'
+                       f'<circle cx="{x}" cy="{y + 10*math.sin(2*math.pi*t + i):.1f}" r="4" fill="#FFFBD0" opacity="{a:.2f}"/>')
+        return "".join(out)
+    if decor == "clouds":
+        return ('<g fill="#FFFFFF" opacity="0.92"><circle cx="0" cy="720" r="120"/><circle cx="120" cy="745" r="90"/>'
+                '<circle cx="1280" cy="720" r="120"/><circle cx="1160" cy="745" r="90"/></g>')
+    if decor == "river":
+        out = []
+        for i, x in enumerate([20, 50, 80, 1200, 1230, 1260]):
+            sw = 6 * math.sin(2 * math.pi * t + i * 0.4)
+            out.append(f'<path d="M{x} 720 Q{x + sw/2:.1f} 540 {x + sw:.1f} 400" stroke="#2E6B4F" stroke-width="9" fill="none"/>'
+                       f'<ellipse cx="{x + sw:.1f}" cy="410" rx="11" ry="34" fill="#7A4E2E"/>')
+        return "".join(out)
+    return ""
