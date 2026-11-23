@@ -420,4 +420,72 @@ EP5 = dict(id="s1e05", title="Finn Learns to Share", chapters=[
        ("narrator", "Find out in the next episode: Mimo and the Lost Star!")]))
 
 
-LONG_EPISODES = {"s1e01": EP1, "s1e02": EP2, "s1e03": EP3, "s1e04": EP4, "s1e05": EP5}
+EP6 = dict(id="s1e06", title="Mimo and the Lost Star", chapters=[
+    dict(label="One Star Is Missing", story=[
+        dict(decor="bedroom", cast=[("mimo", 640, 860, L)], lines=[
+            ("narrator", "Every night, before bed, Mimo counts the stars from his window."),
+            ("mimo", "One, two, three, four, five... and Twinkle! Wait. Where's Twinkle?"),
+            ("mimo", "Twinkle is always right there, next to the moon. But tonight, her spot is empty!"),
+            ("mimo", "Oh no. A little star can't be lost all alone in the dark. I have to find her!")]),
+        dict(decor="forest", cast=[("mimo", -150, 420, L), ("owl", 1450, 860, R)], lines=[
+            ("mimo", "Luna! Luna! Have you seen Twinkle? She's not in the sky!"),
+            ("owl", "Hoo hoo. I did see something strange tonight. A tiny light, falling down, down, down... behind the clouds."),
+            ("mimo", "That must be her! Will you help me find her, Luna?"),
+            ("owl", "Of course, Mimo. Friends always help each other. But first, let's sing her song. Maybe she'll hear us and shine back.")]),
+    ], song=dict(name="Twinkle Twinkle Little Star", decor="forest", cast=[("mimo", 420, L), ("owl", 860, R)], voice="box", transpose=-2)),
+
+    dict(label="Up to the Clouds", story=[
+        dict(decor="clouds", cast=[("mimo", -150, 420, L), ("owl", -330, 760, L), ("bunny", 1450, 1040, R)], lines=[
+            ("narrator", "Mimo and Luna climbed up, up, up the rainbow, to the land of soft clouds."),
+            ("bunny", "Hop hop! Mimo! Luna! What are you doing up here so late?"),
+            ("mimo", "Pip! We're looking for Twinkle. She fell out of the sky!"),
+            ("bunny", "Oh no! I'll help! I'll bounce on the clouds and look everywhere! Boing, boing!"),
+            ("narrator", "They looked behind the big clouds, and under the small clouds, and inside the fluffy clouds."),
+            ("owl", "Hoo hoo. She isn't here. But look, little sparkles on the rainbow. They go down... toward the river."),
+            ("mimo", "Sparkle footprints! Let's follow them!")]),
+    ], song=dict(name="London Bridge", decor="clouds", cast=[("mimo", 330, L), ("bunny", 600, L), ("owl", 880, R)], voice="bell", transpose=0)),
+
+    dict(label="Bubbles Knows Something", story=[
+        dict(decor="river", cast=[("mimo", -150, 330, L), ("bunny", -330, 140, L), ("fish", 1450, 920, R)], lines=[
+            ("fish", "Blub, blub! Hello, friends! Did you lose something shiny?"),
+            ("mimo", "Bubbles! Yes! Our friend Twinkle, the littlest star. Did you see her?"),
+            ("fish", "I saw a little light bounce on the water, like a skipping stone. Plip, plip, plop!"),
+            ("fish", "Then it rolled up the lantern hill. It looked very, very sleepy."),
+            ("bunny", "The lantern hill! It's on the other side of the river!"),
+            ("mimo", "Let's take the boat. Row, row, as fast as we can... but gently!")]),
+    ], song=dict(name="Row Row Row Your Boat", decor="river", boat=True, cast=[("mimo", 560, L), ("bunny", 730, R)], voice="harp", transpose=2)),
+
+    dict(label="Found You, Twinkle!", story=[
+        dict(decor="night", cast=[("mimo", -150, 420, L), ("bunny", -330, 230, L), ("star", 960, 960, R), ("owl", -500, 640, L)], lines=[
+            ("narrator", "At the very top of the lantern hill, behind a pink lantern, something was glowing softly."),
+            ("star", "Hmm? Mimo? Is that you?"),
+            ("mimo", "Twinkle! We found you! Are you okay?"),
+            ("star", "I'm okay. I was so sleepy that I slipped right out of the sky. And now I'm too tired to fly back home."),
+            ("bunny", "Oh no! How can we help a star fly?"),
+            ("owl", "Hoo hoo. I know. Stars fly on happy music. If everyone sings together, Twinkle will float back up."),
+            ("mimo", "Then let's call all our friends! Everybody, to the lantern hill!")]),
+    ], song=dict(name="Mary Had a Little Lamb", decor="night", cast=[("bunny", 220, L), ("lamb", 440, L), ("mimo", 660, L), ("kitten", 880, R), ("star", 1080, R)], voice="bell", transpose=0)),
+
+    dict(label="Back to the Sky", story=[
+        dict(decor="night", cast=[("mimo", 330, 330, L), ("star", 640, 640, L), ("owl", 950, 950, R)], lines=[
+            ("star", "I feel lighter already! One more song, and I'll be back in the sky!"),
+            ("mimo", "Ready, everyone? Let's sing Twinkle's very own song, louder and brighter than ever!"),
+            ("owl", "One, two, three!")]),
+    ], song=dict(name="Twinkle Twinkle Little Star", decor="clouds", cast=[("bunny", 180, L), ("kitten", 380, L), ("mimo", 580, L), ("star", 780, R), ("lamb", 980, R), ("owl", 1150, R)], voice="bell", transpose=2)),
+
+    dict(label="Goodnight, Twinkle", story=[
+        dict(decor="bedroom", cast=[("mimo", 760, 860, L)], lines=[
+            ("narrator", "And Twinkle floated up, up, up, all the way back to her spot, next to the moon."),
+            ("mimo", "One, two, three, four, five... and Twinkle! Everyone is home."),
+            ("narrator", "Far above, the littlest star winked at Mimo. Twinkle, twinkle."),
+            ("mimo", "Goodnight, Twinkle. Goodnight, Luna. Goodnight, everyone.")]),
+    ], song=None),
+], finale=dict(decor="night", cast=[("bunny", 230, L), ("owl", 440, L), ("mimo", 650, L), ("kitten", 860, R), ("lamb", 1070, R)], minutes=12),
+   teaser=dict(decor="bedroom", cast=[("bunny", -150, 640, L)], lines=[
+       ("narrator", "Next time, on Sleepy Mimo..."),
+       ("bunny", "Mimo? Mimo? I can't sleep! My eyes are wide open and my feet want to hop, hop, hop!"),
+       ("narrator", "How do you help a bouncy bunny fall asleep? Maybe... by counting sheep?"),
+       ("narrator", "Find out in the next episode: Pip Can't Sleep!")]))
+
+
+LONG_EPISODES = {"s1e01": EP1, "s1e02": EP2, "s1e03": EP3, "s1e04": EP4, "s1e05": EP5, "s1e06": EP6}
