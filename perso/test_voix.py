@@ -23,12 +23,12 @@ P("parquet files:", len(files))
 for f in files[:80]:
     P("  ", f)
 picked = []
-for key in ["ApprendreLeTunisien", "OneStory", "TunSwitch", "Youtube", ""]:
+for key in ["STT-TTS15s", "AmenyKH/test", "ApprendreLeTunisien/train", "OneStory/train"]:
     for f in files:
         if key.lower() in f.lower() and f not in picked:
             picked.append(f)
             break
-    if len(picked) >= 3:
+    if len(picked) >= 4:
         break
 P("picked:", picked)
 
@@ -43,35 +43,56 @@ for f in picked:
     tcol = next((c for c in TEXT_KEYS if c in cols), None)
     if not acol or not tcol:
         continue
-    n = min(t.num_rows, 400)
+    n = min(t.num_rows, 300)
     for i in range(n):
         a = t[acol][i].as_py(); txt = t[tcol][i].as_py()
-        if not a or not txt:
-            continue
+        segs = t["segments"][i].as_py() if "segments" in cols else None
         b = a.get("bytes") if isinstance(a, dict) else None
         if not b:
             continue
         try:
-            y, sr = sf.read(io.BytesIO(b))
-        except Exception:
-            continue
-        if y.ndim > 1:
-            y = y.mean(1)
-        d = len(y) / sr
-        if not (4.0 <= d <= 9.5) or len(txt) < 25:
-            continue
-        snd = parselmouth.Sound(y, sr)
-        f0 = snd.to_pitch().selected_array["frequency"]; f0 = f0[f0 > 0]
-        if len(f0) < 50:
-            continue
-        fr = y[: len(y) // 512 * 512].reshape(-1, 512)
-        e = np.sqrt((fr ** 2).mean(1) + 1e-12)
-        snr = 20 * np.log10(np.percentile(e, 95) / max(np.percentile(e, 10), 1e-6))
-        cands.append(dict(src=f, i=i, text=txt, dur=d, f0=float(np.median(f0)), snr=float(snr), y=y, sr=sr))
+            y0, sr = sf.read(io.BytesIO(b))
+        except Exception as e:
+            P("decode", e); continue
+        if y0.ndim > 1:
+            y0 = y0.mean(1)
+        pieces = []
+        if segs and isinstance(segs, list) and isinstance(segs[0], dict):
+            k0 = next((k for k in ("start", "begin", "start_time") if k in segs[0]), None)
+            k1 = next((k for k in ("end", "stop", "end_time") if k in segs[0]), None)
+            kt = next((k for k in ("transcript", "text", "sentence") if k in segs[0]), None)
+            if i == 0:
+                P("segment keys:", list(segs[0].keys()), segs[0])
+            if k0 and k1 and kt:
+                for sg in segs:
+                    pieces.append((float(sg[k0]), float(sg[k1]), sg[kt]))
+        if not pieces and txt:
+            pieces = [(0.0, len(y0) / sr, txt)]
+        for (s0, s1, tx) in pieces:
+            y = y0[int(s0 * sr):int(s1 * sr)]
+            d = len(y) / sr
+            if not (3.5 <= d <= 10.0) or not tx or len(tx) < 20:
+                continue
+            snd = parselmouth.Sound(y, sr)
+            f0 = snd.to_pitch().selected_array["frequency"]; f0 = f0[f0 > 0]
+            if len(f0) < 40:
+                continue
+            fr = y[: len(y) // 512 * 512].reshape(-1, 512)
+            e = np.sqrt((fr ** 2).mean(1) + 1e-12)
+            snr = 20 * np.log10(np.percentile(e, 95) / max(np.percentile(e, 10), 1e-6))
+            cands.append(dict(src=f, i=i, text=tx, dur=d, f0=float(np.median(f0)), snr=float(snr), y=y, sr=sr))
 P("candidats:", len(cands))
 
-fem = sorted([c for c in cands if c["f0"] > 175], key=lambda c: -c["snr"])[:4]
-mal = sorted([c for c in cands if c["f0"] < 140], key=lambda c: -c["snr"])[:4]
+def top(lst, n=5):
+    out, per = [], {}
+    for c in sorted(lst, key=lambda c: -c["snr"]):
+        if per.get(c["src"], 0) < 2:
+            out.append(c); per[c["src"]] = per.get(c["src"], 0) + 1
+        if len(out) >= n:
+            break
+    return out
+fem = top([c for c in cands if c["f0"] > 175])
+mal = top([c for c in cands if c["f0"] < 140])
 refs = []
 for g, lst in (("F", fem), ("M", mal)):
     for k, c in enumerate(lst):
