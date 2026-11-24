@@ -16,7 +16,9 @@ def log(*a):
 
 
 t0 = time.time()
-voices = V.episode_voices(ep, f"{OUT}/voix_ep{num}", log=log) if os.environ.get("FAKE_VOICES") != "1" else V.fake_voices(ep)
+voices = V.load_voices(ep, f"voix_ep{num}") if os.environ.get("FAKE_VOICES") != "1" else V.fake_voices(ep)
+missing = sum(1 for si, li, ln in V.all_lines(ep) if not os.path.exists(f"voix_ep{num}/{si:02d}_{li:02d}.wav"))
+log(f"voix chargées, manquantes : {missing}")
 log(f"voix prêtes en {(time.time()-t0)/60:.1f} min")
 mp4 = f"{OUT}/rayen_yakin_ep{num}.mp4"
 shots, total = F.render(ep, voices, mp4, OUT, log=log)
