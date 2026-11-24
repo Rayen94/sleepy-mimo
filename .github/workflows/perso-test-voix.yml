@@ -1,0 +1,38 @@
+name: Perso - test des voix tunisiennes
+
+on:
+  push:
+    branches: [perso-rayen-yakin]
+    paths: ["perso/test_voix.py", ".github/workflows/perso-test-voix.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: perso-test-voix
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Installer
+        run: |
+          sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends ffmpeg
+          pip install -q torch==2.5.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cpu
+          pip install -q habibi-tts faster-whisper praat-parselmouth pyarrow huggingface_hub soundfile
+      - name: Tester
+        run: python perso/test_voix.py
+      - name: Renvoyer les résultats
+        if: always()
+        run: |
+          git config user.name "agent-voix"
+          git config user.email "agent-voix@users.noreply.github.com"
+          git add perso/tests perso/refs || true
+          git commit -m "Résultats du test des voix tunisiennes" || exit 0
+          for i in 1 2 3; do git pull -q --rebase origin perso-rayen-yakin && git push -q origin HEAD:perso-rayen-yakin && break; sleep 5; done
