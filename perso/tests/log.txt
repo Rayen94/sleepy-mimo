@@ -1,0 +1,38 @@
+parquet files: 32
+   data/AmenyKH/test/test-00000-of-00001.parquet
+   data/AmenyKH/train/train-00000-of-00002.parquet
+   data/AmenyKH/train/train-00001-of-00002.parquet
+   data/ApprendreLeTunisien/test/test-00000-of-00001.parquet
+   data/ApprendreLeTunisien/train/train-00000-of-00001.parquet
+   data/MASC/train/train-00000-of-00001.parquet
+   data/OneStory/test/test-00000-of-00001.parquet
+   data/OneStory/train/train-00000-of-00001.parquet
+   data/TunSwitchCS/test/test-00000-of-00001.parquet
+   data/TunSwitchCS/train/train-00000-of-00005.parquet
+   data/TunSwitchCS/train/train-00001-of-00005.parquet
+   data/TunSwitchCS/train/train-00002-of-00005.parquet
+   data/TunSwitchCS/train/train-00003-of-00005.parquet
+   data/TunSwitchCS/train/train-00004-of-00005.parquet
+   data/TunSwitchTO/test/test-00000-of-00001.parquet
+   data/TunSwitchTO/train/train-00000-of-00003.parquet
+   data/TunSwitchTO/train/train-00001-of-00003.parquet
+   data/TunSwitchTO/train/train-00002-of-00003.parquet
+   data/Tunisian_dataset_STT-TTS15s_filtred1.0/train/train-00000-of-00001.parquet
+   data/Wav2Vec-tunisian-Darja/train/train-00000-of-00001.parquet
+   data/Youtube_AbdelAzizErwi/train/train-00000-of-00001.parquet
+   data/Youtube_BayariBilionaire/train/train-00000-of-00001.parquet
+   data/Youtube_DiwanFM/train/train-00000-of-00001.parquet
+   data/Youtube_HamzaBaloumiElMohakek/train/train-00000-of-00001.parquet
+   data/Youtube_HkeyetTounsiaMensia/train/train-00000-of-00001.parquet
+   data/Youtube_LobnaMajjedi/train/train-00000-of-00001.parquet
+   data/Youtube_MohamedKhammessi/train/train-00000-of-00001.parquet
+   data/Youtube_Qlm/train/train-00000-of-00001.parquet
+   data/Youtube_TNScrapped_V1/test/test-00000-of-00001.parquet
+   data/Youtube_TNScrapped_V1/train/train-00000-of-00001.parquet
+   data/Youtube_TN_Shorts/train/train-00000-of-00001.parquet
+   data/Youtube_TV/train/train-00000-of-00001.parquet
+picked: ['data/ApprendreLeTunisien/test/test-00000-of-00001.parquet', 'data/OneStory/test/test-00000-of-00001.parquet', 'data/TunSwitchCS/test/test-00000-of-00001.parquet']
+data/ApprendreLeTunisien/test/test-00000-of-00001.parquet columns: ['audio_id', 'audio', 'segments', 'transcript'] rows: 116
+data/OneStory/test/test-00000-of-00001.parquet columns: ['audio_id', 'audio', 'segments', 'transcript'] rows: 3
+data/TunSwitchCS/test/test-00000-of-00001.parquet columns: ['audio_id', 'audio', 'segments', 'transcript'] rows: 300
+candidats: 0
