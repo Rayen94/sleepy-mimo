@@ -31,8 +31,12 @@ parquet files: 32
    data/Youtube_TNScrapped_V1/train/train-00000-of-00001.parquet
    data/Youtube_TN_Shorts/train/train-00000-of-00001.parquet
    data/Youtube_TV/train/train-00000-of-00001.parquet
-picked: ['data/ApprendreLeTunisien/test/test-00000-of-00001.parquet', 'data/OneStory/test/test-00000-of-00001.parquet', 'data/TunSwitchCS/test/test-00000-of-00001.parquet']
-data/ApprendreLeTunisien/test/test-00000-of-00001.parquet columns: ['audio_id', 'audio', 'segments', 'transcript'] rows: 116
-data/OneStory/test/test-00000-of-00001.parquet columns: ['audio_id', 'audio', 'segments', 'transcript'] rows: 3
-data/TunSwitchCS/test/test-00000-of-00001.parquet columns: ['audio_id', 'audio', 'segments', 'transcript'] rows: 300
+picked: ['data/Tunisian_dataset_STT-TTS15s_filtred1.0/train/train-00000-of-00001.parquet', 'data/AmenyKH/test/test-00000-of-00001.parquet', 'data/ApprendreLeTunisien/train/train-00000-of-00001.parquet', 'data/OneStory/train/train-00000-of-00001.parquet']
+data/Tunisian_dataset_STT-TTS15s_filtred1.0/train/train-00000-of-00001.parquet columns: ['audio_id', 'audio', 'segments', 'transcript'] rows: 1029
+data/AmenyKH/test/test-00000-of-00001.parquet columns: ['audio_id', 'audio', 'segments', 'transcript'] rows: 44
+data/ApprendreLeTunisien/train/train-00000-of-00001.parquet columns: ['audio_id', 'audio', 'segments', 'transcript'] rows: 878
+data/OneStory/train/train-00000-of-00001.parquet columns: ['audio_id', 'audio', 'segments', 'transcript'] rows: 36
 candidats: 0
+ALG 0 rtf 33.49 cer 0.09 |  شنوغة احوالك يا صاحبي لباس عليك  توما نمشي ونشرب قهوة في سيدي بوسعيد
+ALG 1 rtf 47.74 cer 0.12 |  يا عصبا روح طير يا بالغوط  ما فهمتشي
+FINI
