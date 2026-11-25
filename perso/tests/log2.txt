@@ -1,0 +1,39 @@
+picked ['data/Tunisian_dataset_STT-TTS15s_filtred1.0/train/train-00000-of-00001.parquet', 'data/AmenyKH/test/test-00000-of-00001.parquet', 'data/ApprendreLeTunisien/test/test-00000-of-00001.parquet', 'data/OneStory/test/test-00000-of-00001.parquet', 'data/Youtube_TN_Shorts/train/train-00000-of-00001.parquet', 'data/TunSwitchTO/test/test-00000-of-00001.parquet']
+data/Tunisian_dataset_STT-TTS15s_filtred1.0/train/train-00000-of-00001.parquet ['audio_id', 'audio', 'segments', 'transcript'] 100
+  cell dict {'bytes': ('bytes', 118909), 'path': ('str', 13)}
+data/AmenyKH/test/test-00000-of-00001.parquet ['audio_id', 'audio', 'segments', 'transcript'] 44
+  cell dict {'bytes': ('bytes', 203932), 'path': ('str', 17)}
+data/ApprendreLeTunisien/test/test-00000-of-00001.parquet ['audio_id', 'audio', 'segments', 'transcript'] 100
+  cell dict {'bytes': ('bytes', 80684), 'path': ('str', 8)}
+data/OneStory/test/test-00000-of-00001.parquet ['audio_id', 'audio', 'segments', 'transcript'] 3
+  cell dict {'bytes': ('bytes', 1098624), 'path': ('str', 42)}
+data/Youtube_TN_Shorts/train/train-00000-of-00001.parquet ['audio_id', 'audio', 'segments', 'transcript'] 100
+  cell dict {'bytes': ('bytes', 28398), 'path': ('str', 15)}
+data/TunSwitchTO/test/test-00000-of-00001.parquet ['audio_id', 'audio', 'segments', 'transcript'] 100
+  cell dict {'bytes': ('bytes', 1290354), 'path': ('str', 15)}
+candidats 221
+F 0 185 107.5 AmenyKH | ما يا سيم خل نخدو جميل معنا بتليفون جميل. اوكي.
+F 1 218 105.3 AmenyKH | دكتور رهيشة مع مئة عوينة هو ضيفنا اليوم في السيديو
+F 2 221 53.4 OneStory | معتلام ذا. وفما نهار وهما ياكلوا مع بعضهم خبرهم يسوع بلي فما
+F 3 199 49.4 TunSwitchTO | خويا قداتا وسوم ذهبو زاما كفش نار فليانة تو متغشيتش
+F 4 252 46.6 OneStory | نموت  خديمي هو اللي بيشيرثني  يخي جايو بورابيو قالو  مش خديمك اللي
+F 5 191 40.7 Youtube_TN_Shorts | اليوم الحرية الوحيدة اللي بقتلهم في توانسة بعد 2011 هي حرية التعبير وحرية الاعلام
+M 0 123 100.6 AmenyKH | نخترحوه ونصحو به لحبل الكل مع العلم الي راهو
+M 1 116 98.1 AmenyKH | المنطقة هذه ما يعطيش أكله 100%
+M 2 116 99.5 TunSwitchTO | في المخكى السحين وتفهين وفروق الحب ومتواجد الكرة والقهوة والكارت
+M 3 139 61.4 TunSwitchTO | ملا امشي طول ودور على اليمين مع الشارع ثالث وتلقاها على يمينك
+M 4 137 41.6 Youtube_TN_Shorts | يجيب بها  هذا من ناحية الببدأية
+M 5 131 35.7 Youtube_TN_Shorts | فيديوهات امتاع اولاد صغار يقولوا في كلام  رو  كلام  كلام زيد  ويصور  رو
+tn_F0 cer 0.05 | يا زرقة راني ما نردش بيك موش كي تقعد آخر مرغة توغى نمشي للبحر وحدي
+tn_F1 cer 0.08 | يا زرقة راني ما نردش بيك موش كتقعد آخر مرغة تغانمشي للبحر وحدي
+tn_F2 cer 0.06 | يا زرقة، راني ما نردش بيك، موشكي تقعد آخر مرغة، توغى نمشي للبحر وحدي
+tn_F3 cer 0.06 | يا زرقاء راني ما نردش بيك مش كي تقعد آخر مرغة  توا نمشي للبحر وحدي
+tn_F4 cer 0.03 | يا زرقة، راني ما نردش بيك، موشكي تقعد آخر مرة، توة نمشي للبحر وحدي
+tn_F5 cer 0.17 | راني ما نردش بيك  مشكى تقعد اخر مره  توى نمشى للبحر وحدي
+tn_M0 cer 0.05 | يا زرقة راني ما ردش بيك مش كي تقعد اخر مره  تويا نمشي للبحر وحدي
+tn_M1 cer 0.08 | يا زرقراني ما نردوش بيك  موشكي تقعد آخر مرغة  توا نمشي للبحر وحدي
+tn_M2 cer 0.16 | يا زرقة رأيي مردش بيك مش كتقعد آخر مرغة توغى نمشي للبحر وحدي
+tn_M3 cer 0.06 | يا زرقة راني ما نردش بيك مشكي تقعد آخر مرغة  توا نمشي البحر وحدي
+tn_M4 cer 0.23 | بك موشكي  ما نردغش بيك  موشكي تقعد آخر مرغة  توغى نمشي للبحر وحدي
+tn_M5 cer 0.27 | راي مردش بيك موشكي تقعد اخر مره  نمشي للبحر وحدي
+FINI
