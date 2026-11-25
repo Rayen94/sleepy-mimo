@@ -488,4 +488,7 @@ EP6 = dict(id="s1e06", title="Mimo and the Lost Star", chapters=[
        ("narrator", "Find out in the next episode: Pip Can't Sleep!")]))
 
 
-LONG_EPISODES = {"s1e01": EP1, "s1e02": EP2, "s1e03": EP3, "s1e04": EP4, "s1e05": EP5, "s1e06": EP6}
+from .episodes_longs2 import EP7, EP8, EP9, EP10, EP11, EP12
+
+LONG_EPISODES = {"s1e01": EP1, "s1e02": EP2, "s1e03": EP3, "s1e04": EP4, "s1e05": EP5, "s1e06": EP6,
+                 "s1e07": EP7, "s1e08": EP8, "s1e09": EP9, "s1e10": EP10, "s1e11": EP11, "s1e12": EP12}
