@@ -24,7 +24,7 @@ jobs:
       - name: Installer
         run: |
           sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends ffmpeg
-          pip install -q habibi-tts "torch==2.8.0" "torchaudio==2.8.0" faster-whisper praat-parselmouth pyarrow huggingface_hub soundfile --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple
+          pip install -q habibi-tts "torch==2.8.0" "torchaudio==2.8.0" faster-whisper praat-parselmouth pyarrow huggingface_hub soundfile numpy scipy --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple
           python -c "import torch, torchaudio; print(torch.__version__, torchaudio.__version__)"
       - name: Tester
         run: python perso/test_voix.py
