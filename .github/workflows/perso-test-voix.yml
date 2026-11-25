@@ -24,15 +24,18 @@ jobs:
       - name: Installer
         run: |
           sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends ffmpeg
+          pip install -q praat-parselmouth pyarrow huggingface_hub soundfile numpy && exit 0
           pip install -q habibi-tts "torch==2.8.0" "torchaudio==2.8.0" faster-whisper praat-parselmouth pyarrow huggingface_hub soundfile numpy scipy --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple
           python -c "import torch, torchaudio; print(torch.__version__, torchaudio.__version__)"
       - name: Tester
+        env:
+          EXTRACT_ONLY: "1"
         run: python perso/test_voix.py
       - name: Renvoyer les résultats
         if: always()
         run: |
           git config user.name "agent-voix"
           git config user.email "agent-voix@users.noreply.github.com"
-          git add perso/tests perso/refs || true
+          git add -f perso/refs/*.wav perso/tests || true
           git commit -m "Résultats du test des voix tunisiennes" || exit 0
           for i in 1 2 3; do git pull -q --rebase origin perso-rayen-yakin && git push -q origin HEAD:perso-rayen-yakin && break; sleep 5; done

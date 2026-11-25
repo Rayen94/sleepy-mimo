@@ -88,6 +88,14 @@ def top(lst, n):
 fem = top([c for c in cands if c["f0"] > 170], 6)
 mal = top([c for c in cands if 85 < c["f0"] < 150], 6)
 
+if os.environ.get("EXTRACT_ONLY") == "1":
+    for g, lst in (("F", fem), ("M", mal)):
+        for k, c in enumerate(lst):
+            y = c["y"] / (np.abs(c["y"]).max() + 1e-9) * 0.9
+            sf.write(f"{REFS}/tn_{g}{k}.wav", y, c["sr"])
+            P("écrit", g, k, round(c["f0"]))
+    sys.exit(0)
+
 from faster_whisper import WhisperModel
 asr = WhisperModel("medium", device="cpu", compute_type="int8")
 
