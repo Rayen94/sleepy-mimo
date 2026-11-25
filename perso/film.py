@@ -19,6 +19,7 @@ def _mood(sh):
 
 def plan(ep, voices):
     """voices[(i_plan, i_réplique)] = (signal 44.1k, enveloppe bouche 100 Hz)."""
+    TARGET = ep.get("target", 605.0)
     shots, t = [], 0.0
     for si, sh in enumerate(ep["shots"]):
         sh = dict(sh)
@@ -55,7 +56,7 @@ def plan(ep, voices):
     for s in shots:
         s["start"] = t; t += s["dur"]
     # « أحلى اللحظات » : on rejoue les scènes les plus drôles si l'épisode est encore trop court
-    if t < TARGET - 25:
+    if t < TARGET - 25 and not ep.get("short"):
         fun = sorted([s for s in shots if s["kind"] == "dialogue"],
                      key=lambda s: -sum(ln["act"] in ("slip", "jump", "anger") for ln in s["lines_t"]))
         first = True
@@ -66,6 +67,8 @@ def plan(ep, voices):
             if first:
                 c["caption"] = "أحلى اللحظات"; first = False
             shots.append(c); t += c["dur"]
+    if ep.get("short"):
+        return shots, math.ceil(t * FPS) / FPS
     shots.append(dict(kind="credits", decor="toit_nuit", cast=[("rayen", 700, 700, 1), ("yakin", 1000, 1000, -1),
                                                               ("hamma", 1320, 1320, -1), ("sarra", 1580, 1580, -1)],
                       dur=max(14.0, TARGET - t), lines_t=[], start=t, mood="theme"))
@@ -395,8 +398,10 @@ def build_ass(ep, shots, path):
     for s in shots:
         a = s["start"]
         if s["kind"] == "title":
-            ev.append(f"Dialogue: 1,{_ts(a+0.4)},{_ts(a+s['dur']-0.2)},Big,,0,0,0,,{{\\fad(500,400)\\pos(960,210)}}رايان و يقين")
-            ev.append(f"Dialogue: 1,{_ts(a+1.0)},{_ts(a+s['dur']-0.2)},Sub,,0,0,0,,{{\\fad(500,400)\\pos(960,980)}}الحلقة {ep['num']}: {ep['title']}")
+            big = ep["title"] if ep.get("short") else "رايان و يقين"
+            sub = "رايان و يقين" if ep.get("short") else f"الحلقة {ep['num']}: {ep['title']}"
+            ev.append(f"Dialogue: 1,{_ts(a+0.4)},{_ts(a+s['dur']-0.2)},Big,,0,0,0,,{{\\fad(500,400)\\pos(960,210)}}{big}")
+            ev.append(f"Dialogue: 1,{_ts(a+1.0)},{_ts(a+s['dur']-0.2)},Sub,,0,0,0,,{{\\fad(500,400)\\pos(960,980)}}{sub}")
         if s.get("caption"):
             d = 5.0 if (s["kind"] == "montage" and not s.get("end")) or s.get("replay") else s["dur"] - 0.5
             ev.append(f"Dialogue: 1,{_ts(a+0.6)},{_ts(a+0.6+d)},Cap,,0,0,0,,{{\\fad(400,400)}}{s['caption']}")

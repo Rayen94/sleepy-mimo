@@ -48,6 +48,10 @@ jobs:
           pip install -q habibi-tts "torch==2.8.0" "torchaudio==2.8.0" faster-whisper praat-parselmouth soundfile \
             --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple
       - name: Voix ${{ matrix.ep }}-${{ matrix.k }}
+        env:
+          NFE: ${{ matrix.ep == 4 && '32' || '16' }}
+          ATTEMPTS: ${{ matrix.ep == 4 && '3' || '2' }}
+          GOOD: ${{ matrix.ep == 4 && '0.3' || '0.6' }}
         run: python perso/voix_shard.py ${{ matrix.ep }} ${{ matrix.k }} 16
       - uses: actions/upload-artifact@v4
         with:

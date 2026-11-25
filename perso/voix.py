@@ -7,7 +7,8 @@ SR = 44100
 # personnage -> (voix de référence, vitesse, facteur de hauteur, facteur de formants)
 CHOIX = "perso/refs/choix.json"
 DEFAULT = {"rayen": ("EGY", 1.0, 1.16, 1.02), "hamma": ("Najdi", 1.05, 0.9, 0.95), "skander": ("MSA", 0.97, 1.02, 1.0),
-           "yakin": ("ALG", 1.0, 0.9, 1.0), "sarra": ("MAR", 1.05, 1.08, 1.02), "mama": ("IRQ", 0.95, 0.9, 0.97)}
+           "yakin": ("ALG", 1.0, 0.9, 1.0), "sarra": ("MAR", 1.05, 1.08, 1.02), "mama": ("IRQ", 0.95, 0.9, 0.97),
+           "yassmine": ("MAR", 1.02, 1.08, 1.02), "salah": ("Najdi", 0.92, 0.85, 0.93)}
 REF_TEXT = {
     "MSA": ("MSA.mp3", "كان اللعيب حاضرًا في العديد من الأنشطة والفعاليات المرتبطة بكأس العالم، مما سمح للجماهير بالتفاعل معه والتقاط الصور التذكارية."),
     "Najdi": ("Najdi.wav", "تكفى طمني انا اليوم ماني بنايم ولا هو بداخل عيني النوم الين اتطمن عليه."),
@@ -115,12 +116,16 @@ def synth_shard(ep, k, n, out_dir, log=print):
         who, text = ln[0], ln[3]
         rname, speed, pitch, formant = choix.get(who, DEFAULT[who])
         if rname not in prepared:
-            fn, rtext = REF_TEXT[rname]
-            prepared[rname] = preprocess_ref_audio_text(str(pfiles("habibi_tts").joinpath(f"assets/{fn}")), rtext)
+            if rname.startswith("tn_"):
+                r = {x["name"]: x for x in json.load(open("perso/refs/tn_refs.json"))}[rname]
+                prepared[rname] = preprocess_ref_audio_text(r["path"], r["text"])
+            else:
+                fn, rtext = REF_TEXT[rname]
+                prepared[rname] = preprocess_ref_audio_text(str(pfiles("habibi_tts").joinpath(f"assets/{fn}")), rtext)
         ra, rt = prepared[rname]
         gen = _clean(text)
         best = None
-        for attempt in range(2):
+        for attempt in range(int(os.environ.get("ATTEMPTS", "2"))):
             wav, sr, _ = infer_process(ra, rt, gen, m["model"], m["voc"], mel_spec_type="vocos", nfe_step=NFE,
                                        cfg_strength=2.0, sway_sampling_coef=-1.0, speed=speed, device="cpu",
                                        dialect_id=m["tun"])
@@ -136,7 +141,7 @@ def synth_shard(ep, k, n, out_dir, log=print):
                 score += 0.5
             if best is None or score < best[0]:
                 best = (score, wav, sr, hyp)
-            if score < 0.6:
+            if score < float(os.environ.get("GOOD", "0.6")):
                 break
         y, _ = _post(best[1], best[2], pitch, formant)
         sf.write(os.path.join(out_dir, f"{si:02d}_{li:02d}.wav"), y, SR, subtype="PCM_16")

@@ -400,3 +400,58 @@ EP3 = dict(num=3, title="نحبّك", shots=[
 ])
 
 EPISODES = {1: EP1, 2: EP2, 3: EP3}
+
+# ------------------------------------------------------------------ Court-métrage (3 min) : « يا زرقة »
+COURT = dict(num=4, title="يا زرقة", target=185, short=True, shots=[
+    dict(decor="sidibou", cast=[("rayen", 700, 760, 1), ("yakin", 2100, 1180, -1)], lines=[
+        ("rayen", "happy", "wave", "سلام يا زرقة!"),
+        ("yakin", "smug", "hips", "سلام رايان. علاش ديما تعيّطلي الزرقة؟"),
+        ("rayen", "love", "heart", "على خاطر بشرتك سمراء غامقة، وهي أحلى بشرة في تونس الكل.", "hearts"),
+        ("yakin", "shy", "shy", "تحشي فيه كالعادة... أما عجبتني."),
+        ("rayen", "happy", "open", "السبت نمشيو للبحر، إنتِ وأنا؟"),
+        ("yakin", "smug", "think", "نخمّم ونقلّك."),
+    ]),
+    dict(title=True),
+    dict(decor="cafe", cast=[("yakin", 640, 640, 1), ("yassmine", 1060, 1060, -1)], lines=[
+        ("yassmine", "smug", "point", "رايان عزمك للبحر؟"),
+        ("yakin", "happy", "open", "إيه، السبت. شنوّة رأيك؟"),
+        ("yassmine", "smug", "hips", "ما تاخذش رايان. راهو يحب يتعرّف بيك برك. ما تمشيش معاه للبحر."),
+        ("yakin", "worried", "think", "علاش تقولي هكّا يا ياسمين؟"),
+        ("yassmine", "smug", "open", "الشباب الصغار الكل هكّا. أنا نحب الرجال الكبار، اللي عندهم شيب وكرهبة."),
+        ("yakin", "laugh", "facepalm", "يا ربّي، إنتِ ما تتبدّليش."),
+    ]),
+    dict(decor="cafe", cast=[("yakin", 560, 560, 1), ("yassmine", 900, 900, 1), ("salah", 2200, 1380, -1, "bambalouni")], lines=[
+        ("salah", "happy", "wave", "صباح الخير يا بنات! بمبالوني سخون؟"),
+        ("yassmine", "love", "heart", "صباح النور يا عم صالح... قدّاش عمرك؟", "hearts"),
+        ("salah", "surprised", "idle", "خمسة وستّين يا بنتي، وعندي ستّة صغار."),
+        ("yassmine", "love", "heart", "يا سلام! راجل مسؤول!", "hearts"),
+        ("salah", "worried", "facepalm", "يا بنتي، أنا نبيع في البمبالوني برك.", "sweat"),
+        ("yakin", "laugh", "open", "هههه! يا ياسمين، خلّي الراجل يخدم!"),
+    ]),
+    dict(decor="sidibou_soir", cast=[("rayen", 700, 700, 1, "jasmine"), ("yakin", 2100, 1180, -1)], lines=[
+        ("rayen", "happy", "hold", "يقين! جبتلك مشموم ياسمين!"),
+        ("yakin", "angry", "point", "يا نيّاك يا كذّاب! تحشي فيه! لا تحبّني لا زبّي!", "anger"),
+        ("rayen", "surprised", "up", "شنوّة؟! شكون قالك هالكلام؟", "jump"),
+        ("yakin", "angry", "fist", "ياسمين قاتلي إنّك تحب تتعرّف بيّا برك!", "anger"),
+        ("rayen", "smug", "hips", "ياسمين؟ اللي تحب عم صالح متاع البمبالوني؟"),
+        ("yakin", "angry", "hips", "ما تبدّلش الموضوع!"),
+        ("rayen", "sad", "idle", "يا زرقة، راني ما نردّش بيك. موش كي تقعد آخر مرّة."),
+        ("yakin", "surprised", "think", "آخر مرّة؟ شنوّة تقصد؟"),
+        ("rayen", "sad", "idle", "آخر مرّة صدّقتي الناس وما صدّقتنيش، وأنا سامحتك. المرّة هاذي لا."),
+        ("yakin", "sad", "heart", "رايان... أستنّى..."),
+    ]),
+    dict(decor="sidibou_soir", cast=[("yakin", 960, 960, 1, "jasmine")], lines=[
+        ("yakin", "sad", "hold", "مشموم ياسمين... جابهولي بالحق."),
+        ("yakin", "sad", "heart", "وأنا سبّيتو قدّام الناس الكل... يا ربّي شنوّة عملت."),
+    ]),
+    dict(decor="cafe", cast=[("yakin", 560, 560, 1, "jasmine"), ("yassmine", 2100, 1000, -1), ("salah", 2350, 1380, -1)], lines=[
+        ("yassmine", "happy", "up", "يقين! يقين! عم صالح طلبني للزواج!", "jump"),
+        ("salah", "angry", "facepalm", "يا بنتي، أنا قلتلك نحب نبيعك بمبالوني برك!"),
+        ("yakin", "angry", "point", "ياسمين! إنتِ اللي خرّبتي كل شي مع رايان!"),
+        ("yassmine", "shy", "shy", "آسفة... الصراحة هو يحبّك بالحق. شفتو يشري في المشموم ساعة كاملة."),
+        ("yakin", "worried", "up", "لازمني نلقاه توّا!"),
+        ("salah", "happy", "point", "إجري يا بنتي! هو في سيدي بوسعيد، فوق الدروج!"),
+    ]),
+    dict(montage=True, decor="sidibou_soir", cast=[("yakin", -200, 960, 1, "jasmine")], caption="يتبع...", min=8, end=True),
+])
+EPISODES[4] = COURT

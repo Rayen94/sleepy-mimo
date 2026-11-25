@@ -5,8 +5,12 @@ import math
 CAST = {
     "rayen": dict(name="رايان", skin="#D9A57B", skin2="#C48E66", hair="#1E1612", style="fade", eyes="#4A2C1A",
                   top="#D63A3A", top2="#B02A2E", pants="#2F4E7A", shoes="#F4F4F4", beard=True, girl=False, h=1.0),
-    "yakin": dict(name="يقين", skin="#EEC4A2", skin2="#DDAA88", hair="#3A2218", style="long", eyes="#2E8FD8",
+    "yakin": dict(name="يقين", skin="#6E4128", skin2="#57311D", hair="#120A06", style="long", eyes="#3A2416",
                   top="#F2C14E", top2="#DFA92E", pants="#F2C14E", shoes="#C8434E", girl=True, clip="#FFFFFF", h=0.95),
+    "yassmine": dict(name="ياسمين", skin="#EBBE9A", skin2="#D6A57F", hair="#9A4E1E", style="bob", eyes="#4A2C1A",
+                     top="#E8559A", top2="#C93F80", pants="#2F3550", shoes="#FFFFFF", girl=True, earrings=True, h=0.94),
+    "salah": dict(name="عم صالح", skin="#D9A57B", skin2="#C48E66", hair="#D8D8D8", style="chechia", eyes="#3A2416",
+                  top="#8A7350", top2="#6E5A3C", pants="#5A4A34", shoes="#3A2A1A", mustache=True, girl=False, h=0.93, wide=1.16),
     "hamma": dict(name="حمّة", skin="#C99168", skin2="#B27C55", hair="#15100D", style="curly", eyes="#3A2416",
                   top="#2FA36B", top2="#24865A", pants="#3B3B46", shoes="#E9E2D0", cap="#F2F2F2", girl=False, h=0.97, wide=1.18),
     "sarra": dict(name="سارة", skin="#E2B08A", skin2="#CC9670", hair="#5B2E1E", style="bob", eyes="#5A3A22",
@@ -18,7 +22,7 @@ CAST = {
 }
 NAMES = {k: v["name"] for k, v in CAST.items()}
 NAMES["narrator"] = ""
-COLORS = {"rayen": "#FF8A7A", "yakin": "#7CC8FF", "hamma": "#8CF0B0", "sarra": "#D2B0FF", "skander": "#9EC3FF", "mama": "#7FE0D8", "narrator": "#FFFFFF"}
+COLORS = {"yassmine": "#FF9AD0", "salah": "#E8C890", "rayen": "#FF8A7A", "yakin": "#FFD27A", "hamma": "#8CF0B0", "sarra": "#D2B0FF", "skander": "#9EC3FF", "mama": "#7FE0D8", "narrator": "#FFFFFF"}
 
 # angles des bras (épaule, coude) en degrés : 0 = bras le long du corps, + = vers l'extérieur / le haut
 GEST = {
@@ -86,6 +90,13 @@ def _hair_front(c, t):
         return (f'<path d="M-96 -470 Q-108 -604 0 -608 Q108 -604 96 -470 L96 -420 Q100 -400 84 -404 L80 -500 Q40 -540 -10 -536 Q-60 -540 -80 -500 L-84 -404 Q-100 -400 -96 -420Z" fill="{h}"/>')
     if st == "gel":
         return (f'<path d="M-82 -505 Q-90 -600 0 -612 Q60 -618 96 -590 Q70 -600 50 -592 Q90 -570 84 -505 Q60 -560 0 -560 Q-50 -556 -82 -505Z" fill="{h}"/>')
+    if st == "chechia":
+        return (f'<path d="M-86 -470 Q-92 -420 -80 -400 L-70 -404 Q-80 -440 -76 -480Z" fill="{h}"/>'
+                f'<path d="M86 -470 Q92 -420 80 -400 L70 -404 Q80 -440 76 -480Z" fill="{h}"/>'
+                '<path d="M-74 -520 Q-80 -600 0 -604 Q80 -600 74 -520 Q0 -540 -74 -520Z" fill="#C21E2E"/>'
+                '<path d="M-74 -522 Q0 -540 74 -522" stroke="#9A1422" stroke-width="6" fill="none"/>'
+                '<path d="M0 -602 Q30 -610 46 -580 L52 -540" stroke="#111" stroke-width="7" fill="none"/>'
+                '<path d="M46 -548 L40 -520 M52 -546 L54 -518 M58 -548 L66 -522" stroke="#111" stroke-width="5"/>')
     if st == "scarf":
         return ('<path d="M-96 -480 Q-100 -620 0 -620 Q100 -620 96 -480 Q90 -560 0 -566 Q-90 -560 -96 -480Z" fill="#C8546E"/>'
                 '<path d="M-96 -480 Q-96 -430 -80 -400 L-70 -404 Q-84 -440 -84 -480Z" fill="#C8546E"/>'
@@ -142,6 +153,10 @@ def _face(c, mouth, blink, look, emo, t):
     blush = 0.85 if emo in ("shy", "love") else 0.35
     out.append(f'<ellipse cx="{-52+lx:.1f}" cy="-424" rx="17" ry="10" fill="#FF7A8A" opacity="{blush}"/>'
                f'<ellipse cx="{52+lx:.1f}" cy="-424" rx="17" ry="10" fill="#FF7A8A" opacity="{blush}"/>')
+    if c.get("mustache"):
+        out.append(f'<path d="M{-40+lx:.1f} -414 Q{-20+lx:.1f} -432 {lx:.1f} -420 Q{20+lx:.1f} -432 {40+lx:.1f} -414 Q{20+lx:.1f} -410 {lx:.1f} -412 Q{-20+lx:.1f} -410 {-40+lx:.1f} -414Z" fill="{c["hair"]}"/>')
+    if c.get("earrings"):
+        out.append('<circle cx="-86" cy="-424" r="8" fill="#FFD84A"/><circle cx="86" cy="-424" r="8" fill="#FFD84A"/>')
     if c.get("beard"):
         out.append(f'<path d="M-74 -440 Q-70 -370 0 -362 Q70 -370 74 -440 Q66 -392 0 -386 Q-66 -392 -74 -440Z" fill="{c["hair"]}" opacity="0.32"/>')
     # bouche

@@ -32,7 +32,7 @@ log("volume :", monteur.loudness(mp4))
 if os.environ.get("YT_REFRESH_TOKEN") and os.environ.get("ENVOYER", "1") == "1":
     from agents import publieur
     from googleapiclient.http import MediaFileUpload
-    title = f"رايان و يقين — الحلقة {num}: {ep['title']}"
+    title = f"{ep['title']} — رايان و يقين (فيلم قصير)" if ep.get("short") else f"رايان و يقين — الحلقة {num}: {ep['title']}"
     desc = (f"رايان و يقين — الحلقة {num}\n"
             "سلسلة كرتون بالدارجة التونسية (مشروع شخصي).\n\n"
             "Voix : Habibi-TTS (SWivid, CC BY-NC-SA 4.0), voix de référence : LinTO Tunisian dataset (Linagora, CC BY 4.0). "
