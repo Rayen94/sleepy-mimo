@@ -125,23 +125,29 @@ def synth_shard(ep, k, n, out_dir, log=print):
         ra, rt = prepared[rname]
         gen = _clean(text)
         best = None
-        for attempt in range(int(os.environ.get("ATTEMPTS", "2"))):
+        nchar = len(norm(gen))
+        ref_dur = sf.info(ra).duration
+        for attempt in range(int(os.environ.get("ATTEMPTS", "4"))):
+            fix = None
+            if attempt >= 1 or nchar < 8:
+                # durée imposée : assez de temps pour bien prononcer (≈ 0,085 s par lettre)
+                fix = ref_dur + max(1.0, 0.085 * nchar + 0.35) * (1.0 + 0.1 * (attempt % 2))
             wav, sr, _ = infer_process(ra, rt, gen, m["model"], m["voc"], mel_spec_type="vocos", nfe_step=NFE,
                                        cfg_strength=2.0, sway_sampling_coef=-1.0, speed=speed, device="cpu",
-                                       dialect_id=m["tun"])
+                                       dialect_id=m["tun"], fix_duration=fix)
             wav = np.asarray(wav, dtype=np.float32)
             score, hyp = 0.0, ""
-            if m["asr"] is not None and len(norm(gen)) >= 6:
+            if m["asr"] is not None:
                 p = os.path.join(out_dir, f"_tmp{k}.wav"); sf.write(p, wav, sr)
-                segs, _ = m["asr"].transcribe(p, language="ar", beam_size=2)
+                segs, _ = m["asr"].transcribe(p, language="ar", beam_size=3)
                 hyp = " ".join(s_.text for s_ in segs)
                 score = cer(gen, hyp)
-            ratio = (len(wav) / sr) / max(1, len(norm(gen)))
-            if ratio > 0.2 or ratio < 0.035:
+            ratio = (len(wav) / sr) / max(1, nchar)
+            if ratio > 0.2 or ratio < 0.045:
                 score += 0.5
             if best is None or score < best[0]:
                 best = (score, wav, sr, hyp)
-            if score < float(os.environ.get("GOOD", "0.6")):
+            if score < float(os.environ.get("GOOD", "0.35")):
                 break
         y, _ = _post(best[1], best[2], pitch, formant)
         sf.write(os.path.join(out_dir, f"{si:02d}_{li:02d}.wav"), y, SR, subtype="PCM_16")

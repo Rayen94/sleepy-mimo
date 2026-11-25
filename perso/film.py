@@ -40,14 +40,14 @@ def plan(ep, voices):
                 y, mouth = voices[(si, li)]
                 d = len(y) / SR
                 lines.append(dict(who=who, emo=emo, gest=gest, text=text, act=act, start=lt, dur=d, mouth=mouth, key=(si, li)))
-                lt += d + 0.62 + (0.9 if act in ("slip", "jump") else 0) + (0.25 if text.endswith(("؟", "!", "?")) else 0)
+                lt += d + 0.45 + (0.9 if act in ("slip", "jump") else 0) + (0.25 if text.endswith(("؟", "!", "?")) else 0)
             sh["lines_t"] = lines
             sh["dur"] = lt + (1.0 if sh["kind"] == "dialogue" else 2.6)
         sh["mood"] = _mood(sh)
         shots.append(sh)
     # allonger les montages musicaux pour atteindre ~10 min
     total = sum(s["dur"] for s in shots)
-    mont = [s for s in shots if s["kind"] == "montage"]
+    mont = [s for s in shots if s["kind"] == "montage" and not s.get("end")]
     if total < TARGET and mont:
         extra = TARGET - total
         for s in mont:
@@ -431,7 +431,7 @@ def build_ass(ep, shots, path):
             ev.append(f"Dialogue: 1,{_ts(a+0.4)},{_ts(a+s['dur']-0.2)},Big,,0,0,0,,{{\\fad(500,400)\\pos(960,210)}}{big}")
             ev.append(f"Dialogue: 1,{_ts(a+1.0)},{_ts(a+s['dur']-0.2)},Sub,,0,0,0,,{{\\fad(500,400)\\pos(960,980)}}{sub}")
         if s.get("caption"):
-            d = 5.0 if (s["kind"] == "montage" and not s.get("end")) or s.get("replay") else s["dur"] - 0.5
+            d = s["dur"] - 0.5 if s.get("end") else 5.0
             ev.append(f"Dialogue: 1,{_ts(a+0.6)},{_ts(a+0.6+d)},Cap,,0,0,0,,{{\\fad(400,400)}}{s['caption']}")
         if s["kind"] == "credits":
             ev.append(f"Dialogue: 1,{_ts(a+0.5)},{_ts(a+s['dur']-0.3)},Big,,0,0,0,,{{\\fad(600,600)\\pos(960,210)}}رايان و يقين")

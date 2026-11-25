@@ -50,8 +50,8 @@ jobs:
       - name: Voix ${{ matrix.ep }}-${{ matrix.k }}
         env:
           NFE: ${{ matrix.ep == 4 && '32' || '16' }}
-          ATTEMPTS: ${{ matrix.ep == 4 && '3' || '2' }}
-          GOOD: ${{ matrix.ep == 4 && '0.3' || '0.6' }}
+          ATTEMPTS: "4"
+          GOOD: "0.35"
         run: python perso/voix_shard.py ${{ matrix.ep }} ${{ matrix.k }} 16
       - uses: actions/upload-artifact@v4
         with:
@@ -99,8 +99,12 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           pattern: voix-ep${{ matrix.ep }}-*
-          path: voix_ep${{ matrix.ep }}
-          merge-multiple: true
+          path: voix_dl
+      - name: Rassembler les voix
+        run: |
+          mkdir -p voix_ep${{ matrix.ep }}
+          find voix_dl -name "*.wav" ! -name "_tmp*" -exec cp {} voix_ep${{ matrix.ep }}/ \;
+          ls voix_ep${{ matrix.ep }} | wc -l
       - uses: actions/download-artifact@v4
         continue-on-error: true
         with:
