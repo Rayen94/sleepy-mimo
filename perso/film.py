@@ -384,14 +384,14 @@ def build_ass(ep, shots, path):
     for s in shots:
         a = s["start"]
         if s["kind"] == "title":
-            ev.append(f"Dialogue: 1,{_ts(a+0.4)},{_ts(a+s['dur']-0.2)},Big,,0,0,0,,{{\\fad(500,400)\\pos(960,430)}}رايان و يقين")
-            ev.append(f"Dialogue: 1,{_ts(a+1.0)},{_ts(a+s['dur']-0.2)},Sub,,0,0,0,,{{\\fad(500,400)\\pos(960,640)}}الحلقة {ep['num']}: {ep['title']}")
+            ev.append(f"Dialogue: 1,{_ts(a+0.4)},{_ts(a+s['dur']-0.2)},Big,,0,0,0,,{{\\fad(500,400)\\pos(960,210)}}رايان و يقين")
+            ev.append(f"Dialogue: 1,{_ts(a+1.0)},{_ts(a+s['dur']-0.2)},Sub,,0,0,0,,{{\\fad(500,400)\\pos(960,980)}}الحلقة {ep['num']}: {ep['title']}")
         if s.get("caption"):
             d = 5.0 if s["kind"] == "montage" and not s.get("end") else s["dur"] - 0.5
             ev.append(f"Dialogue: 1,{_ts(a+0.6)},{_ts(a+0.6+d)},Cap,,0,0,0,,{{\\fad(400,400)}}{s['caption']}")
         if s["kind"] == "credits":
-            ev.append(f"Dialogue: 1,{_ts(a+0.5)},{_ts(a+s['dur']-0.3)},Big,,0,0,0,,{{\\fad(600,600)\\pos(960,420)}}رايان و يقين")
-            ev.append(f"Dialogue: 1,{_ts(a+1.2)},{_ts(a+s['dur']-0.3)},Sub,,0,0,0,,{{\\fad(600,600)\\pos(960,620)}}"
+            ev.append(f"Dialogue: 1,{_ts(a+0.5)},{_ts(a+s['dur']-0.3)},Big,,0,0,0,,{{\\fad(600,600)\\pos(960,210)}}رايان و يقين")
+            ev.append(f"Dialogue: 1,{_ts(a+1.2)},{_ts(a+s['dur']-0.3)},Sub,,0,0,0,,{{\\fad(600,600)\\pos(960,980)}}"
                       + ("تابعونا في الحلقة الجاية" if ep["num"] < 3 else "النهاية... والحكاية مازالت"))
         for ln in s["lines_t"]:
             t0, t1 = a + ln["start"] - 0.05, a + ln["start"] + ln["dur"] + 0.3
