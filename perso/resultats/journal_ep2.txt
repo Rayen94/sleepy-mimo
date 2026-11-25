@@ -1,6 +1,7 @@
 voix chargées, manquantes : 0
+fichiers voix présents : 107 ['00_00.wav', '00_01.wav', '00_02.wav', '00_03.wav', '02_00.wav', '02_01.wav', '02_02.wav', '02_03.wav', '02_04.wav', '02_05.wav', '02_06.wav', '03_00.wav', '03_01.wav', '03_02.wav', '03_03.wav', '03_04.wav', '03_05.wav', '03_06.wav', '03_07.wav', '03_08.wav', '04_00.wav', '04_01.wav', '04_02.wav', '04_03.wav', '04_04.wav', '04_05.wav', '04_06.wav', '04_07.wav', '04_08.wav', '04_09.wav', '04_10.wav', '04_11.wav', '04_12.wav', '04_13.wav', '04_14.wav', '05_00.wav', '05_01.wav', '05_02.wav', '05_03.wav', '05_04.wav', '05_05.wav', '05_06.wav', '05_07.wav', '05_08.wav', '06_00.wav', '06_01.wav', '06_02.wav', '06_03.wav', '06_04.wav', '07_00.wav', '07_01.wav', '07_02.wav', '07_03.wav', '07_04.wav', '07_05.wav', '07_06.wav', '07_07.wav', '08_00.wav', '08_01.wav', '08_02.wav', '08_03.wav', '08_04.wav', '08_05.wav', '08_06.wav', '08_07.wav', '08_08.wav', '09_00.wav', '09_01.wav', '09_02.wav', '09_03.wav', '09_04.wav', '09_05.wav', '10_00.wav', '10_01.wav', '10_02.wav', '10_03.wav', '10_04.wav', '10_05.wav', '10_06.wav', '10_07.wav']
 voix prêtes en 0.0 min
-Épisode 2 : 20 plans, 10.1 min
+Épisode 2 : 21 plans, 10.1 min
   image 0/18150
   image 1800/18150
   image 3600/18150
@@ -12,7 +13,7 @@ voix prêtes en 0.0 min
   image 14400/18150
   image 16200/18150
   image 18000/18150
-vidéo prête : 10.1 min, en 21.2 min au total
+vidéo prête : 10.1 min, en 28.1 min au total
 contrôle décodage : True 
-volume : (-19.6, -0.7)
-ENVOYÉE SUR YOUTUBE (privé) : nK0XVu_c2pQ
+volume : (-19.5, -0.8)
+ENVOI YOUTUBE ÉCHOUÉ : <HttpError 400 when requesting None returned "The user has exceeded the number of videos they may upload.". Details: "[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]">
