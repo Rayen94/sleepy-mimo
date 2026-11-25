@@ -19,6 +19,10 @@ t0 = time.time()
 voices = V.load_voices(ep, f"voix_ep{num}") if os.environ.get("FAKE_VOICES") != "1" else V.fake_voices(ep)
 missing = sum(1 for si, li, ln in V.all_lines(ep) if not os.path.exists(f"voix_ep{num}/{si:02d}_{li:02d}.wav"))
 log(f"voix chargées, manquantes : {missing}")
+import glob
+log("fichiers voix présents :", len(glob.glob(f"voix_ep{num}/*.wav")), sorted(os.listdir(f"voix_ep{num}"))[:80] if os.path.isdir(f"voix_ep{num}") else "aucun dossier")
+if missing and os.environ.get("FAKE_VOICES") != "1":
+    raise SystemExit(f"{missing} voix manquantes : on n'envoie pas une vidéo incomplète")
 log(f"voix prêtes en {(time.time()-t0)/60:.1f} min")
 mp4 = f"{OUT}/rayen_yakin_ep{num}.mp4"
 shots, total = F.render(ep, voices, mp4, OUT, log=log)
