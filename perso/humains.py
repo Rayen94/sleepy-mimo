@@ -7,7 +7,7 @@ CAST = {
                   top="#D63A3A", top2="#B02A2E", pants="#2F4E7A", shoes="#F4F4F4", beard=True, girl=False, h=1.0),
     "yakin": dict(name="يقين", skin="#6E4128", skin2="#57311D", hair="#120A06", style="long", eyes="#3A2416",
                   top="#F2C14E", top2="#DFA92E", pants="#F2C14E", shoes="#C8434E", girl=True, clip="#FFFFFF", h=0.95),
-    "yassmine": dict(name="ياسمين", skin="#EBBE9A", skin2="#D6A57F", hair="#9A4E1E", style="bob", eyes="#4A2C1A",
+    "yassmine": dict(name="شيماء", skin="#EBBE9A", skin2="#D6A57F", hair="#9A4E1E", style="bob", eyes="#4A2C1A",
                      top="#E8559A", top2="#C93F80", pants="#2F3550", shoes="#FFFFFF", girl=True, earrings=True, h=0.94),
     "salah": dict(name="عم صالح", skin="#D9A57B", skin2="#C48E66", hair="#D8D8D8", style="chechia", eyes="#3A2416",
                   top="#8A7350", top2="#6E5A3C", pants="#5A4A34", shoes="#3A2A1A", mustache=True, girl=False, h=0.93, wide=1.16),
