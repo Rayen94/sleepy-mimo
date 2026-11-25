@@ -1,0 +1,11 @@
+voix chargées, manquantes : 21
+voix prêtes en 0.0 min
+Épisode 4 : 9 plans, 3.2 min
+  image 0/5791
+  image 1800/5791
+  image 3600/5791
+  image 5400/5791
+vidéo prête : 3.2 min, en 6.9 min au total
+contrôle décodage : True 
+volume : (-21.8, -0.7)
+ENVOYÉE SUR YOUTUBE (privé) : dnUdZw9hd_g
