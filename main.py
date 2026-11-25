@@ -28,6 +28,9 @@ def main():
         return
     SHORT_SECONDS = cfg["short_seconds"]
     mem = Memory()
+    if os.environ.get("GITHUB_EVENT_NAME") == "schedule" and any(d["date"] == date for d in mem.data["days"]):
+        log(f"Directeur : la journée du {date} est déjà produite, le déclencheur de secours ne fait rien.")
+        return
     used_titles = mem.used_titles()
 
     log("Stratège : planification du jour")

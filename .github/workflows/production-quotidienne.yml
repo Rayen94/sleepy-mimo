@@ -3,6 +3,8 @@ name: Sleepy Mimo - production quotidienne
 on:
   schedule:
     - cron: "23 9 * * *"    # tous les jours vers 10h23 à Paris (après la remise à zéro du quota YouTube)
+    - cron: "47 12 * * *"   # déclencheur de secours (si celui de 10h23 a sauté) : ne fait rien si la journée est déjà produite
+    - cron: "17 16 * * *"   # deuxième secours
   workflow_dispatch:       # bouton « Run workflow » pour lancer à la main
     inputs:
       episode:
