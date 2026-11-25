@@ -133,6 +133,24 @@ def actors(sh, ts):
                 st["fx"] = (sp["act"], u)
         elif sp and sp["who"] in xs:
             st["look"] = 1.0 if xs[sp["who"]] > x else -1.0
+        # câlin / bisou : les deux se rapprochent et restent collés jusqu'à la fin du plan
+        hk = [ln for ln in sh["lines_t"] if ln["act"] in ("hug", "kiss") and ln["start"] <= ts]
+        if hk and len(xs) >= 2:
+            u0 = min(1.0, (ts - hk[0]["start"]) / 0.7)
+            u0 = u0 * u0 * (3 - 2 * u0)
+            mid = sum(xs.values()) / len(xs)
+            side = 1 if x > mid else -1
+            st["x"] = x + (mid + side * 95 - x) * u0
+            st["facing"] = -side
+            st["gesture"] = "heart" if st["gesture"] == "idle" else st["gesture"]
+            st["emo"] = "love" if not st["talk"] else st["emo"]
+            st["hug"] = u0
+        if sp and sp["act"] == "kiss":
+            u = ts - sp["start"]
+            if sp["who"] == who:
+                st["tilt"] = -side * 9 * math.sin(math.pi * min(1.0, u / max(sp["dur"], 0.5))) if hk else 0
+            elif u < sp["dur"] + 1.5:
+                st["fx"] = ("kiss", u)
         # chute (glissade) : pendant la réplique et un peu après
         for ln in sh["lines_t"]:
             if ln["who"] == who and ln["act"] == "slip":
@@ -144,6 +162,8 @@ def actors(sh, ts):
                         st["fx"] = ("stars", u)
         if kind == "montage" and who in ("rayen", "yakin") and int(ts / 4) % 3 == 1:
             st["fx"] = ("hearts", ts % 4)
+        if sp and sp["act"] == "hug" and sp["who"] != who:
+            st["fx"] = ("hearts", ts - sp["start"])
         st["blink"] = ((ts + len(who) * 0.37) % 3.9) < 0.12
         out.append(st)
     return out, sp
@@ -166,6 +186,13 @@ def _fx(kind, x, y, u, s):
         p = 1 + 0.15 * math.sin(u * 20)
         return (f'<g transform="translate({x + 90*s:.0f} {y - 600*s:.0f}) scale({s*p:.2f})" stroke="#E8243C" stroke-width="7" fill="none" stroke-linecap="round">'
                 '<path d="M-20 -6 Q-8 -8 -6 -20 M6 -20 Q8 -8 20 -6 M20 6 Q8 8 6 20 M-6 20 Q-8 8 -20 6"/></g>')
+    if kind == "kiss":
+        a = max(0.0, 1 - u / 2.5)
+        p = 1 + 0.3 * math.sin(min(u, 0.4) / 0.4 * math.pi)
+        return (f'<g transform="translate({x - 40*s:.0f} {y - 420*s:.0f}) scale({s*p:.2f})" opacity="{a:.2f}">'
+                '<path d="M-22 0 Q-11 -12 0 -4 Q11 -12 22 0 Q11 14 0 12 Q-11 14 -22 0Z" fill="#E8244C"/>'
+                '<path d="M-20 0 Q0 4 20 0" stroke="#9A1030" stroke-width="3" fill="none"/></g>'
+                + _fx("hearts", x, y, u, s))
     if kind == "stars":
         g = ""
         for i in range(4):
@@ -185,7 +212,8 @@ def _draw_actor(st, t, s=1.0):
         g = f'<g transform="translate({x:.1f} {y:.1f}) rotate({ang:.1f})">{body}</g>'
         hx, hy = x - 380 * s * fall * st["facing"] * 0.9, y - 60 * s
     else:
-        g = f'<g transform="translate({x:.1f} {y:.1f})">{body}</g>'
+        tilt = st.get("tilt", 0.0)
+        g = f'<g transform="translate({x:.1f} {y:.1f}) rotate({tilt:.1f})">{body}</g>'
         hx, hy = x, y - st["jump"] * 60 * s
     if st["fx"]:
         k, u = st["fx"]

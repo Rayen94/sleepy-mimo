@@ -454,6 +454,14 @@ COURT = dict(num=4, title="يا زرقة", target=185, short=True, shots=[
         ("yakin", "worried", "up", "لازمني نلقاه توّا!"),
         ("salah", "happy", "point", "إجري يا بنتي! هو في سيدي بوسعيد، فوق الدروج!"),
     ]),
-    dict(montage=True, decor="sidibou_soir", cast=[("yakin", -200, 960, 1, "jasmine")], caption="يتبع...", min=8, end=True),
+    dict(decor="sidibou_soir", cast=[("rayen", 820, 820, 1), ("yakin", -200, 1060, 1, "jasmine")], lines=[
+        ("yakin", "sad", "heart", "رايان! سامحني... كنت غالطة. شيماء قالتلي الحقيقة."),
+        ("rayen", "sad", "idle", "يا زرقة... قلتلك المرّة هاذي لا."),
+        ("yakin", "sad", "hold", "نعرف... أما جبتلك المشموم متاعك. نحبّك يا رايان."),
+        ("rayen", "love", "heart", "ما نجّمش نقعد زعفان عليك. إيجا لهنا.", "hug"),
+        ("rayen", "love", "heart", "في الجبل يا حبيبي، في الجبل!", "kiss"),
+        ("yakin", "laugh", "open", "هههه! إنت مهبول... أما نحبّك.", "hearts"),
+    ]),
+    dict(montage=True, decor="sidibou_soir", cast=[("rayen", 860, 860, 1), ("yakin", 1020, 1020, -1, "jasmine")], caption="النهاية", min=6, end=True),
 ])
 EPISODES[4] = COURT
