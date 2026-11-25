@@ -1,0 +1,18 @@
+voix chargées, manquantes : 0
+voix prêtes en 0.0 min
+Épisode 2 : 20 plans, 10.1 min
+  image 0/18150
+  image 1800/18150
+  image 3600/18150
+  image 5400/18150
+  image 7200/18150
+  image 9000/18150
+  image 10800/18150
+  image 12600/18150
+  image 14400/18150
+  image 16200/18150
+  image 18000/18150
+vidéo prête : 10.1 min, en 21.2 min au total
+contrôle décodage : True 
+volume : (-19.6, -0.7)
+ENVOYÉE SUR YOUTUBE (privé) : nK0XVu_c2pQ
