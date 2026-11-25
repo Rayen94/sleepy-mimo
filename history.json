@@ -223,6 +223,45 @@
      "video_id": "4-Vk3Vev1wk"
     }
    ]
+  },
+  {
+   "date": "2026-11-25",
+   "run": "45632134596",
+   "long": {
+    "title": "Sleepy Mimo Ep. 4 😴 The Bedtime Bell | Bedtime Adventure & Nursery Rhymes",
+    "theme": "ocean",
+    "story": "s1e04",
+    "episode": 4,
+    "originals": [
+     "Mimo's Dreamy Song",
+     "Mimo's Cozy Nap Song",
+     "Mimo's Misty Dream",
+     "Mimo's Velvet Lullaby",
+     "Mimo's Silver Lullaby",
+     "Mimo's Misty Hush"
+    ],
+    "video_id": null
+   },
+   "shorts": [
+    {
+     "title": "The Bedtime Bell (Part 1) 🌙 Sleepy Mimo Episode 4 #shorts #kids",
+     "theme": "moon",
+     "song": "Mimo's Moonbeam Melody",
+     "video_id": null
+    },
+    {
+     "title": "The Bedtime Bell (Part 2) 🌙 Sleepy Mimo Episode 4 #shorts #kids",
+     "theme": "clouds",
+     "song": "Mimo's Feather Dream",
+     "video_id": null
+    },
+    {
+     "title": "The Bedtime Bell (Part 3) 🌙 Sleepy Mimo Episode 4 #shorts #kids",
+     "theme": "forest",
+     "song": "Mimo's Lavender Song",
+     "video_id": null
+    }
+   ]
   }
  ]
 }
