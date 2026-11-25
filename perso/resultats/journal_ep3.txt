@@ -1,0 +1,18 @@
+voix chargées, manquantes : 0
+voix prêtes en 0.0 min
+Épisode 3 : 17 plans, 10.4 min
+  image 0/18693
+  image 1800/18693
+  image 3600/18693
+  image 5400/18693
+  image 7200/18693
+  image 9000/18693
+  image 10800/18693
+  image 12600/18693
+  image 14400/18693
+  image 16200/18693
+  image 18000/18693
+vidéo prête : 10.4 min, en 28.0 min au total
+contrôle décodage : True 
+volume : (-19.5, -0.1)
+ENVOYÉE SUR YOUTUBE (privé) : bHvtgvdkZ18
