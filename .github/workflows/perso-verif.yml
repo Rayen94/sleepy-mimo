@@ -3,7 +3,7 @@ name: Perso - vérification du son
 on:
   push:
     branches: [perso-rayen-yakin]
-    paths: ["perso/verif.py", ".github/workflows/perso-verif.yml"]
+    paths: ["perso/diag.py", ".github/workflows/perso-verif.yml"]
 
 permissions:
   contents: write
@@ -27,9 +27,18 @@ jobs:
         with: {pattern: "rayen-yakin-episode-*", path: verif/ep23, merge-multiple: true, run-id: 45517092086, github-token: "${{ secrets.GITHUB_TOKEN }}"}
       - uses: actions/download-artifact@v4
         with: {name: rayen-yakin-episode-4, path: verif/ep4, run-id: 45533041497, github-token: "${{ secrets.GITHUB_TOKEN }}"}
-      - run: python perso/verif.py
+      - uses: actions/download-artifact@v4
+        with: {pattern: "voix-ep1-*", path: voix_ep1, merge-multiple: true, run-id: 45514399300, github-token: "${{ secrets.GITHUB_TOKEN }}"}
+      - uses: actions/download-artifact@v4
+        with: {pattern: "voix-ep2-*", path: voix_ep2, merge-multiple: true, run-id: 45517092086, github-token: "${{ secrets.GITHUB_TOKEN }}"}
+      - uses: actions/download-artifact@v4
+        with: {pattern: "voix-ep3-*", path: voix_ep3, merge-multiple: true, run-id: 45517092086, github-token: "${{ secrets.GITHUB_TOKEN }}"}
+      - uses: actions/download-artifact@v4
+        with: {pattern: "voix-ep4-*", path: voix_ep4, merge-multiple: true, run-id: 45533041497, github-token: "${{ secrets.GITHUB_TOKEN }}"}
+      - run: pip install -q praat-parselmouth scipy mido cairosvg==2.7.1
+      - run: python perso/diag.py
       - if: always()
         run: |
           git config user.name "agent-verif"; git config user.email "agent-verif@users.noreply.github.com"
-          git add perso/resultats/verif.md; git commit -m "Vérification du son" || exit 0
+          git add perso/resultats/diag.txt; git commit -m "Vérification du son" || exit 0
           for i in 1 2 3; do git pull -q --rebase origin perso-rayen-yakin && git push -q origin HEAD:perso-rayen-yakin && break; sleep 5; done
