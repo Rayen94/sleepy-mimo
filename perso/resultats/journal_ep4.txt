@@ -1,11 +1,11 @@
-voix chargées, manquantes : 21
+voix chargées, manquantes : 0
+fichiers voix présents : 44 ['00_00.wav', '00_01.wav', '00_02.wav', '00_03.wav', '00_04.wav', '00_05.wav', '02_00.wav', '02_01.wav', '02_02.wav', '02_03.wav', '02_04.wav', '02_05.wav', '03_00.wav', '03_01.wav', '03_02.wav', '03_03.wav', '03_04.wav', '03_05.wav', '03_06.wav', '03_07.wav', '04_00.wav', '04_01.wav', '04_02.wav', '04_03.wav', '04_04.wav', '04_05.wav', '04_06.wav', '04_07.wav', '04_08.wav', '04_09.wav', '05_00.wav', '05_01.wav', '06_00.wav', '06_01.wav', '06_02.wav', '06_03.wav', '06_04.wav', '06_05.wav', '07_00.wav', '07_01.wav', '07_02.wav', '07_03.wav', '07_04.wav', '07_05.wav']
 voix prêtes en 0.0 min
-Épisode 4 : 9 plans, 3.2 min
-  image 0/5791
-  image 1800/5791
-  image 3600/5791
-  image 5400/5791
-vidéo prête : 3.2 min, en 6.9 min au total
+Épisode 4 : 9 plans, 2.8 min
+  image 0/5121
+  image 1800/5121
+  image 3600/5121
+vidéo prête : 2.8 min, en 8.1 min au total
 contrôle décodage : True 
-volume : (-21.8, -0.7)
-ENVOYÉE SUR YOUTUBE (privé) : dnUdZw9hd_g
+volume : (-19.5, -0.9)
+ENVOI YOUTUBE ÉCHOUÉ : <HttpError 400 when requesting None returned "The user has exceeded the number of videos they may upload.". Details: "[{'message': 'The user has exceeded the number of videos they may upload.', 'domain': 'youtube.video', 'reason': 'uploadLimitExceeded'}]">
