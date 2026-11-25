@@ -1,0 +1,35 @@
+name: Perso - vérification du son
+
+on:
+  push:
+    branches: [perso-rayen-yakin]
+    paths: ["perso/verif.py", ".github/workflows/perso-verif.yml"]
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  verif:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: |
+          sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends ffmpeg
+          pip install -q faster-whisper soundfile numpy
+      - uses: actions/download-artifact@v4
+        with: {name: rayen-yakin-episode-1, path: verif/ep1, run-id: 45514399300, github-token: "${{ secrets.GITHUB_TOKEN }}"}
+      - uses: actions/download-artifact@v4
+        with: {pattern: "rayen-yakin-episode-*", path: verif/ep23, merge-multiple: true, run-id: 45517092086, github-token: "${{ secrets.GITHUB_TOKEN }}"}
+      - uses: actions/download-artifact@v4
+        with: {name: rayen-yakin-episode-4, path: verif/ep4, run-id: 45533041497, github-token: "${{ secrets.GITHUB_TOKEN }}"}
+      - run: python perso/verif.py
+      - if: always()
+        run: |
+          git config user.name "agent-verif"; git config user.email "agent-verif@users.noreply.github.com"
+          git add perso/resultats/verif.md; git commit -m "Vérification du son" || exit 0
+          for i in 1 2 3; do git pull -q --rebase origin perso-rayen-yakin && git push -q origin HEAD:perso-rayen-yakin && break; sleep 5; done
