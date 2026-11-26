@@ -262,6 +262,45 @@
      "video_id": null
     }
    ]
+  },
+  {
+   "date": "2026-11-26",
+   "run": "45728370471",
+   "long": {
+    "title": "Finn Learns to Share 🌟 Episode 5 | Sleepy Mimo Bedtime Story & Sing-Along",
+    "theme": "clouds",
+    "story": "s1e05",
+    "episode": 5,
+    "originals": [
+     "Mimo's Sleepy Melody",
+     "Mimo's Cuddly Serenade",
+     "Mimo's Feather Lullaby",
+     "Mimo's Cuddly Tune",
+     "Mimo's Pillow Nap Song",
+     "Mimo's Snuggly Hush"
+    ],
+    "video_id": "2G4Bg2DxqT8"
+   },
+   "shorts": [
+    {
+     "title": "Finn Learns to Share (Part 1) 🌙 Sleepy Mimo Episode 5 #shorts #kids",
+     "theme": "forest",
+     "song": "Mimo's Stardust Hush",
+     "video_id": "2CSBR1kUK7E"
+    },
+    {
+     "title": "Finn Learns to Share (Part 2) 🌙 Sleepy Mimo Episode 5 #shorts #kids",
+     "theme": "rain",
+     "song": "Mimo's Starlight Serenade",
+     "video_id": "YS-50hUTXVU"
+    },
+    {
+     "title": "Finn Learns to Share (Part 3) 🌙 Sleepy Mimo Episode 5 #shorts #kids",
+     "theme": "moon",
+     "song": "Mimo's Stardust Song",
+     "video_id": "i65GF8bfpOM"
+    }
+   ]
   }
  ]
 }
