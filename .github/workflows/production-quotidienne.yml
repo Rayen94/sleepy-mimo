@@ -15,6 +15,10 @@ on:
         description: "Nombre de Shorts (vide = comme dans consignes.yml)"
         required: false
         default: ""
+      test:
+        description: "oui = essai : rien n'est envoyé sur YouTube, la mémoire et le rapport ne changent pas"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -82,6 +86,7 @@ jobs:
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           EPISODE_OVERRIDE: ${{ github.event.inputs.episode }}
           SHORTS_OVERRIDE: ${{ github.event.inputs.shorts }}
+          TEST_RUN: ${{ github.event.inputs.test }}
         run: python main.py
 
       - name: Garder les vidéos en téléchargement (7 jours)

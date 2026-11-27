@@ -131,7 +131,16 @@ EPISODE_TITLES = [
 ]
 
 
+S2_TITLES = [
+    "{story} 🌙 Sleepy Mimo: Wild Nights, Episode {ep} | Animal Bedtime Adventure",
+    "Wild Nights Ep. {ep}: {story} 🦊 Bedtime Story with Real Animals",
+    "{story} ✨ Sleepy Mimo Wild Nights {ep} | Nature Bedtime Story for Kids",
+]
+
+
 def episode_meta(rng, ep, number, res, used_titles, extra_tags=()):
+    if ep.get("style") == "s2":
+        return _episode_meta_s2(rng, ep, number, res, used_titles, extra_tags)
     title = None
     for i in rng.permutation(len(EPISODE_TITLES)):
         cand = EPISODE_TITLES[i].format(ep=number, story=ep["title"])
@@ -153,4 +162,29 @@ def episode_meta(rng, ep, number, res, used_titles, extra_tags=()):
             "#bedtimestory #lullaby #nurseryrhymes #kidssongs #sleepymimo")
     tags = ["sleepy mimo", "bedtime story", "bedtime stories for kids", "nursery rhymes", "kids songs", "lullabies for babies",
             "sing along", "kids cartoon", "story for kids", "baby sleep music", ep["title"].lower()] + [s.lower() for s in songs[:3]] + list(extra_tags)
+    return dict(title=title, description=desc, tags=tags[:30])
+
+
+def _episode_meta_s2(rng, ep, number, res, used_titles, extra_tags=()):
+    title = None
+    for i in rng.permutation(len(S2_TITLES)):
+        cand = S2_TITLES[i].format(ep=number, story=ep["title"])
+        if cand not in used_titles and len(cand) <= 100:
+            title = cand; break
+    title = title or f"Sleepy Mimo Wild Nights {number}: {ep['title']}"
+    songs = [c["song"]["name"] for c in ep["chapters"] if c.get("song")]
+    chapters = "\n".join(f"{fmt(t)} {label}" for t, label in res["chapters"])
+    cast = sorted({c for ch in ep["chapters"] for sh in ch["story"] for (c, *_r) in sh["cast"]})
+    from .personnages import NAMES, SPECIES
+    names = ", ".join(f"{NAMES[c]} the {SPECIES[c]}" for c in cast if c in NAMES)
+    desc = (f"📺 Sleepy Mimo: Wild Nights, episode {number}: {ep['title']}\n\n"
+            f"{ep.get('blurb', 'Mimo the little bear goes on a gentle night adventure in the wild.')}\n"
+            f"Friends in this episode: {names}.\n\n"
+            + (f"🦉 Real animal fact: {ep['fact']}\n\n" if ep.get("fact") else "")
+            + (f"🎵 Songs: {', '.join(dict.fromkeys(songs))}\n\n" if songs else "")
+            + "⏱️ Chapters\n" + chapters +
+            "\n\n💤 Calm, kind stories to end the day. The episode finishes with soft lullabies while everyone falls asleep.\n\n"
+            "#bedtimestory #animalsforkids #sleepymimo #wildnights #lullaby")
+    tags = ["sleepy mimo", "wild nights", "bedtime story", "bedtime stories for kids", "animal stories for kids", "nature for kids",
+            "lullabies for babies", "kids cartoon", "story for kids", ep["title"].lower()] + [s.lower() for s in songs[:3]] + list(extra_tags)
     return dict(title=title, description=desc, tags=tags[:30])

@@ -3,7 +3,7 @@ avec des personnages qui parlent, puis la comptine qui va avec l'histoire.
 Le scénario est tiré au sort parmi plusieurs modèles, avec des variantes (ami, lieu, répliques)."""
 import math, random
 import numpy as np
-from . import personnages as C, decors as D, comediens as V, illustrateur as I
+from . import personnages as C, decors as D, comediens as V, illustrateur as I, style as STYLE
 
 SR = 44100
 FPS = 30
@@ -288,6 +288,8 @@ def actors(sh, ts):
             s, y = 1.25, 470 + 8 * math.sin(2 * math.pi * ts / 2.2)
         if who == "star":
             y = 330 + 14 * math.sin(2 * math.pi * ts / 3)
+        if who == "bat":
+            y = 330 + 18 * math.sin(2 * math.pi * ts / 2.4)
         acts.append(dict(who=who, x=x, y=y, s=s, x0=x0, x1=x1, facing=facing, moving=moving, idx=idx))
     sp = next((a for a in acts if speaking and a["who"] == speaking["who"]), None)
     for a in acts:
@@ -295,7 +297,7 @@ def actors(sh, ts):
         a["walk"] = (abs(a["x"] - a["x0"]) / 140.0) % 1.0 if a["moving"] else 0.0
         a["mouth"], a["wave"], a["jump"], a["tilt"], a["look"] = 0.0, 0.0, 0.0, 0.0, 0.0
         a["blink"] = ((ts + idx * 1.7) % 3.9) < 0.14
-        if not a["moving"] and who not in ("star", "fish"):
+        if not a["moving"] and who not in ("star", "fish", "bat"):
             a["y"] += 2 * math.sin(2 * math.pi * ts / 2.5 + idx)
         f = a["facing"] if not a["moving"] else (1 if a["x1"] > a["x0"] else -1)
         a["f"] = f
@@ -308,7 +310,7 @@ def actors(sh, ts):
                     a["jump"] = 22 * math.sin(math.pi * dt / 0.45)
                 if "?" in speaking["text"]:
                     a["tilt"] = 6 * math.sin(math.pi * min(1.0, dt / 0.6))
-                if who in ARMS:
+                if who in ARMS or STYLE.s2():
                     hello = any(w in speaking["text"] for w in ("Hello", "Hi,", "Hi ", "Hey"))
                     a["wave"] = math.sin(math.pi * min(1, dt / 1.4)) if (hello and dt < 1.4) else 0.25 + 0.2 * math.sin(2 * math.pi * 1.3 * ts)
             elif sp is not None and who != "fish":
@@ -320,19 +322,22 @@ def actors(sh, ts):
 
 def shot_inner(sh, ts, seed, cam=None):
     t_dec = (ts / 16.0) % 1.0
-    parts = [D.DECORS[sh["decor"]](t_dec, seed)]
+    parts = [D.DECORS[sh["decor"]](t_dec, seed, cam) if sh["decor"] in D._D2.DECORS else D.DECORS[sh["decor"]](t_dec, seed)]
     if sh.get("sleeping"):
         parts.append(f'<g transform="translate(250 455) scale(0.85)">{I.bear(("#8FB8E8", "#B9D4F3"), ts / 16.0)}{I.zzz(ts / 16.0)}</g>')
     acts, _ = actors(sh, ts)
     for a in acts:
-        body = C.draw(a["who"], 0, 0, a["s"], mouth=a["mouth"], blink=a["blink"], walk=a["walk"], wave=a["wave"], facing=a["f"], look=a["look"])
+        body = C.draw(a["who"], 0, 0, a["s"], mouth=a["mouth"], blink=a["blink"], walk=a["walk"], wave=a["wave"], facing=a["f"], look=a["look"], t=ts, pose=sh.get("pose"))
         parts.append(f'<g transform="translate({a["x"]:.1f} {a["y"] - a["jump"]:.1f}) rotate({a["tilt"] * a["f"]:.2f} 0 {134 * a["s"]:.0f})">{body}</g>')
     if sh.get("boat"):
         parts.append(_boat_front(ts))
     if any(c[0] == "fish" for c in sh["cast"]):
         parts.append(D.water_front(ts / 4.0))
-    dx = 0.0 if cam is None else (cam[0] - 640) * -0.25
-    parts.append(f'<g transform="translate({dx:.1f} 0)">{D.foreground(sh["decor"], t_dec)}</g>')
+    if sh["decor"] in D._D2.FRONTS:
+        parts.append(D.foreground(sh["decor"], t_dec, cam))
+    else:
+        dx = 0.0 if cam is None else (cam[0] - 640) * -0.25
+        parts.append(f'<g transform="translate({dx:.1f} 0)">{D.foreground(sh["decor"], t_dec)}</g>')
     return "".join(parts)
 
 
@@ -432,7 +437,7 @@ def _wrap(text, n=24):
     return lines
 
 
-COLORS = {"mimo": "#FFC36B", "owl": "#C9A7FF", "bunny": "#FFB3D1", "star": "#FFE37A", "lamb": "#F2E6FF", "kitten": "#FFB27A", "duck": "#FFE066", "fox": "#FF9A5A", "fish": "#5EC8F2", "narrator": "#FFFFFF"}
+COLORS = {"mimo": "#FFC36B", "owl": "#C9A7FF", "bunny": "#FFB3D1", "star": "#FFE37A", "lamb": "#F2E6FF", "kitten": "#FFB27A", "duck": "#FFE066", "fox": "#FF9A5A", "fish": "#5EC8F2", "hedgehog": "#D9B98E", "otter": "#C99A6E", "fawn": "#F0B56E", "beaver": "#C48A5A", "bat": "#C7A8E8", "turtle": "#9ED08A", "narrator": "#FFFFFF"}
 
 
 def short_parts(shots, total, n, min_len=25.0, max_len=58.0):

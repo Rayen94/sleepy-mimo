@@ -62,10 +62,10 @@ def lullabies(minutes, rng):
 
 
 # ---------------------------------------------------------------- Image : les personnages chantent et dansent
-def perf_inner(song, ts, bpm, mouth, seed, total):
+def perf_inner(song, ts, bpm, mouth, seed, total, cam=None):
     t_dec = (ts / 16.0) % 1.0
     beat = ts * bpm / 60.0
-    parts = [D.DECORS[song["decor"]](t_dec, seed)]
+    parts = [D.DECORS[song["decor"]](t_dec, seed, cam) if song["decor"] in D._D2.DECORS else D.DECORS[song["decor"]](t_dec, seed)]
     mi = min(int(ts * 100), len(mouth) - 1)
     m = float(mouth[mi]) if len(mouth) else 0.0
     sleepy = song.get("sleepy")
@@ -78,6 +78,8 @@ def perf_inner(song, ts, bpm, mouth, seed, total):
         asleep = (who == sleepy and ts < total * 0.75)
         if who == "star":
             y = 330 + 14 * math.sin(2 * math.pi * ts / 3)
+        if who == "bat":
+            y = 330 + 18 * math.sin(2 * math.pi * ts / 2.4)
         bounce = 0 if asleep else 9 * abs(math.sin(math.pi * (beat + idx * 0.5)))
         sway = (1.5 if asleep else 4) * math.sin(math.pi * (beat + idx * 0.5) / 2)
         wave = 0.0
@@ -85,7 +87,7 @@ def perf_inner(song, ts, bpm, mouth, seed, total):
             wave = 0.5 + 0.5 * math.sin(math.pi * beat)
         mo = 0.0 if asleep else m * (0.9 + 0.1 * math.sin(idx + beat))
         blink = asleep or ((ts + idx * 1.3) % 4.1) < 0.14
-        body = PE.draw(who, 0, 0, s, mouth=mo, blink=blink, wave=wave, facing=facing)
+        body = PE.draw(who, 0, 0, s, mouth=mo, blink=blink, wave=wave, facing=facing, t=ts, pose="sleep" if asleep else None)
         parts.append(f'<g transform="translate({x:.1f} {y - bounce:.1f}) rotate({sway:.2f} 0 {134 * s:.0f})">{body}</g>')
         if asleep:
             parts.append(f'<g transform="translate({x + 30:.0f} {y - 80:.0f}) scale(0.9)">{I.zzz(ts / 8.0)}</g>')
@@ -96,6 +98,8 @@ def perf_inner(song, ts, bpm, mouth, seed, total):
         parts.append(HS._boat_front(ts))
     if any(c[0] == "fish" for c in song["cast"]):
         parts.append(D.water_front(ts / 4.0))
+    if song["decor"] in D._D2.FRONTS:
+        parts.append(D.foreground(song["decor"], t_dec, cam))
     return "".join(parts)
 
 
@@ -132,9 +136,9 @@ def song_camera(song, ts):
 def perf_body(song, ts, bpm, mouth, seed, total):
     k = W / 1280
     cx, cy, z = song_camera(song, ts)
-    fg = f'<g transform="translate({(cx - 640) * -0.25:.1f} 0)">{D.foreground(song["decor"], (ts / 16.0) % 1.0)}</g>'
+    fg = "" if song["decor"] in D._D2.FRONTS else f'<g transform="translate({(cx - 640) * -0.25:.1f} 0)">{D.foreground(song["decor"], (ts / 16.0) % 1.0)}</g>'
     return (HS.VIGNETTE + f'<g transform="scale({k:.4f}) translate(640 360) scale({z:.4f}) translate({-cx:.1f} {-cy:.1f})">'
-            f'{perf_inner(song, ts, bpm, mouth, seed, total)}{fg}</g>'
+            f'{perf_inner(song, ts, bpm, mouth, seed, total, (cx, cy, z))}{fg}</g>'
             f'<rect width="{W}" height="{H}" fill="url(#vig_story)"/>'
             + I.text(W - 30 * k, 50 * k, "Sleepy Mimo", int(26 * k), "#FFFFFF", 600, "end", False, 0.7))
 
@@ -154,13 +158,15 @@ def sleep_loop_frames(fin, seed, n_loop):
     """Boucle parfaite : les amis dorment sous les étoiles."""
     for kf in range(n_loop):
         t = kf / n_loop
-        parts = [D.DECORS[fin["decor"]](t, seed)]
+        parts = [D.DECORS[fin["decor"]](t, seed, None) if fin["decor"] in D._D2.DECORS else D.DECORS[fin["decor"]](t, seed)]
         for idx, (who, x, facing) in enumerate(fin["cast"]):
             br = math.sin(2 * math.pi * (2 * t + idx * 0.2))
             s = 0.9
-            body = PE.draw(who, 0, 0, s, blink=True, facing=facing)
-            parts.append(f'<g transform="translate({x} {D.GROUND - 134 * s:.1f}) translate(0 {134*s:.0f}) scale(1 {1 + 0.015*br:.4f}) translate(0 {-134*s:.0f})">{body}</g>')
+            body = PE.draw(who, 0, 0, s, blink=True, facing=facing, t=t * 16, pose="sleep")
+            parts.append(f'<g transform="translate({x} {D.ground(fin["decor"]) - 134 * s:.1f}) translate(0 {134*s:.0f}) scale(1 {1 + 0.015*br:.4f}) translate(0 {-134*s:.0f})">{body}</g>')
             parts.append(f'<g transform="translate({x + 30} {D.GROUND - 300}) scale(0.8)">{I.zzz((t + idx * 0.25) % 1.0)}</g>')
+        if fin["decor"] in D._D2.FRONTS:
+            parts.append(D.foreground(fin["decor"], t, None))
         k = W / 1280
         body = (f'<g transform="scale({k:.4f})">{"".join(parts)}</g>'
                 f'<rect width="{W}" height="{H}" fill="#0B1030" opacity="0.28"/>'
@@ -170,6 +176,8 @@ def sleep_loop_frames(fin, seed, n_loop):
 
 # ---------------------------------------------------------------- Épisode complet
 def build(ep, episode_no, rng, out, workdir, fonts="fonts", log=print):
+    from . import style
+    style.set_style(ep.get("style"))
     seg, pos = [], 0.0          # (type, données, début)
     audio = []
 
@@ -210,7 +218,8 @@ def build(ep, episode_no, rng, out, workdir, fonts="fonts", log=print):
         add_audio(x)
     # au revoir + bande-annonce du prochain épisode
     friend = next((c for ch_ in ep["chapters"] for sh_ in ch_["story"] for (c, *_r) in sh_["cast"] if c not in ("mimo", "star")), "owl")
-    bye = dict(decor="night", cast=[("mimo", 520, 520, 1), (friend, 780, 780, -1)], lines=[
+    from . import style as _st
+    bye = dict(decor=ep.get("bye_decor", "night"), cast=[("mimo", 420, 420, 1), (friend, 880, 880, -1)] if _st.s2() else [("mimo", 520, 520, 1), (friend, 780, 780, -1)], lines=[
         ("mimo", "Goodnight, friends! Thank you for watching."),
         (friend, "Sweet dreams! And don't miss the next episode!")])
     shots_o = [bye] + ([ep["teaser"]] if ep.get("teaser") else [])

@@ -27,13 +27,23 @@ def make_episode(ep, number, path):
             for (c, *_r) in sh["cast"]:
                 if c not in cast:
                     cast.append(c)
-    cast = (["mimo"] + [c for c in cast if c != "mimo"])[:4]
+    from . import style
+    wild = style.s2()
+    cast = (["mimo"] + [c for c in cast if c != "mimo"])[: 3 if wild else 4]
+    if wild:
+        decor = next((d for d in decors if d not in ("den", "cave", "rain_night")), decors[0])
     body = [D.DECORS[decor](0.2, 3)]
     xs = {1: [330], 2: [250, 470], 3: [170, 370, 570], 4: [130, 300, 470, 640]}[len(cast)]
+    if wild:
+        xs = {1: [380], 2: [250, 560], 3: [190, 480, 710]}[len(cast)]
     for i, (c, x) in enumerate(zip(cast, xs)):
         s = 1.25 if c == "mimo" else 1.0
-        y = 300 if c == "star" else D.GROUND + 40 - 134 * s
+        if wild:
+            s = 1.4 if c == "mimo" else 1.2
+        y = 300 if c in ("star", "bat") and not wild else (330 if c == "bat" else D.ground(decor) + 40 - 134 * s) if wild else (300 if c == "star" else D.GROUND + 40 - 134 * s)
         body.append(PE.draw(c, x, y, s, mouth=0.55 if c == "mimo" else 0.0, wave=1.0 if i == 0 else 0.0))
+    if wild:
+        body.append(D.foreground(decor, 0.2))
     body.append('<rect x="760" y="0" width="520" height="720" fill="#1B1550" opacity="0.35"/>')
     body.append(I.text(1020, 150, f"EPISODE {number}", 70, "#FFE37A"))
     words, rows, cur = ep["title"].upper().split(), [], ""

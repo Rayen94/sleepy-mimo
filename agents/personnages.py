@@ -4,8 +4,8 @@ Chaque fonction dessine le personnage centré en (0, 0) (les pieds vers y=+130),
 mouth : ouverture de la bouche (0 à 1), blink : yeux fermés, walk : phase de marche (0 à 1), wave : bras levé."""
 import math
 
-NAMES = {"fish": "Bubbles", "mimo": "Mimo", "owl": "Luna", "bunny": "Pip", "star": "Twinkle", "lamb": "Wooly", "kitten": "Mia", "duck": "Dot", "fox": "Finn"}
-SPECIES = {"fish": "big fish", "mimo": "little bear", "owl": "owl", "bunny": "bunny", "star": "little star", "lamb": "little lamb", "kitten": "kitten", "duck": "duckling", "fox": "fox"}
+NAMES = {"hedgehog": "Hazel", "otter": "Ollie", "fawn": "Fern", "beaver": "Chip", "bat": "Echo", "turtle": "Shelly", "fish": "Bubbles", "mimo": "Mimo", "owl": "Luna", "bunny": "Pip", "star": "Twinkle", "lamb": "Wooly", "kitten": "Mia", "duck": "Dot", "fox": "Finn"}
+SPECIES = {"hedgehog": "hedgehog", "otter": "otter", "fawn": "fawn", "beaver": "beaver", "bat": "little bat", "turtle": "turtle", "fish": "big fish", "mimo": "little bear", "owl": "owl", "bunny": "bunny", "star": "little star", "lamb": "little lamb", "kitten": "kitten", "duck": "duckling", "fox": "fox"}
 
 
 def _eyes(xl, xr, y, r, blink, look=0.0, col="#2B1A12"):
@@ -199,7 +199,16 @@ def fish(mouth=0.0, blink=False, walk=0.0, wave=0.0, look=0.0):
 DRAW = {"fish": fish, "mimo": mimo, "owl": owl, "bunny": bunny, "star": star, "lamb": lamb, "kitten": kitten, "duck": duck, "fox": fox}
 
 
-def draw(name, x, y, s, mouth=0.0, blink=False, walk=0.0, wave=0.0, facing=1, look=0.0, **kw):
+def draw(name, x, y, s, mouth=0.0, blink=False, walk=0.0, wave=0.0, facing=1, look=0.0, t=0.0, pose=None, **kw):
+    from . import style
+    if style.s2():
+        from . import realiste as R
+        if name in R.DRAW2:
+            k = R.FIT.get(name, 0.8)
+            return (f'<g transform="translate({x:.1f} {y:.1f}) scale({s*facing:.3f} {s:.3f})">'
+                    f'<ellipse cx="0" cy="134" rx="{110*k:.0f}" ry="11" fill="#000000" opacity="0.28"/>'
+                    f'<g transform="translate(0 134) scale({k}) translate(0 -131)">'
+                    f'{R.DRAW2[name](mouth=mouth, blink=blink, walk=walk, wave=wave, look=look, t=t, pose=pose)}</g></g>')
     return (f'<g transform="translate({x:.1f} {y:.1f}) scale({s*facing:.3f} {s:.3f})">'
             f'<ellipse cx="0" cy="134" rx="62" ry="10" fill="#000000" opacity="0.12"/>'
             f'{DRAW[name](mouth=mouth, blink=blink, walk=walk, wave=wave, look=look, **kw)}</g>')

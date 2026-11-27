@@ -165,9 +165,12 @@ def night_hill(t, rng_seed=6):
     return "".join(out)
 
 
+from . import decors2 as _D2
+GROUND_BY.update(_D2.GROUND_BY)
 DECORS = {"meadow": meadow, "forest": forest, "clouds": cloudland, "bedroom": bedroom, "river": river, "night": night_hill}
 PLACE_NAMES = {"meadow": "the flower meadow", "forest": "the rainbow forest", "clouds": "the land of clouds",
-               "river": "the sparkly river", "night": "the lantern hill", "bedroom": "Mimo's room"}
+               "river": "the sparkly river", "night": "the lantern hill", "bedroom": "Mimo's room", **_D2.PLACE_NAMES}
+DECORS.update(_D2.DECORS)
 
 
 def water_front(t):
@@ -177,8 +180,10 @@ def water_front(t):
             f'<path d="M{" L".join(pts)}" stroke="#BFE3F2" stroke-width="4" fill="none" opacity="0.7"/>')
 
 
-def foreground(decor, t):
+def foreground(decor, t, cam=None):
     """Premier plan (devant les personnages) pour donner de la profondeur."""
+    if decor in _D2.FRONTS:
+        return _D2.FRONTS[decor](t, 1, cam)
     if decor == "meadow":
         out = []
         for i, (x, y, sc, col) in enumerate([(40, 700, 2.6, "#FF6F91"), (130, 720, 2.0, "#B57BFF"), (1200, 705, 2.4, "#FFB347"), (1110, 725, 1.9, "#5EC8F2")]):

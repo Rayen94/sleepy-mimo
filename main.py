@@ -19,6 +19,9 @@ def main():
     rng = np.random.default_rng(int(date.replace("-", "")))
     shutil.rmtree(OUT, ignore_errors=True); os.makedirs(OUT)
     cfg, warnings = consignes.load()
+    TEST = bool(os.environ.get("TEST_RUN"))
+    if TEST:
+        cfg["upload"] = False
     for w in warnings:
         log(f"Consigne : {w}")
     if cfg["pause"]:
@@ -45,7 +48,16 @@ def main():
     episode = int(os.environ.get("EPISODE_OVERRIDE") or 0) or mem.next_episode()
     from agents.episodes_longs import LONG_EPISODES
     from agents.saison1 import EPISODES
-    if plan.get("story") and os.environ.get("EPISODE_OVERRIDE"):
+    n1 = len(EPISODES)
+    if episode > n1 and plan.get("story"):
+        sid = f"s2e{episode - n1:02d}"            # saison 2 : épisodes 13 à 24
+        if sid not in LONG_EPISODES:
+            log(f"Directeur : l'épisode {episode} ({sid}) n'est pas encore écrit. Rien n'est produit (on ne rejoue pas la saison 1).")
+            os.makedirs("reports", exist_ok=True)
+            open(f"reports/{date}.md", "w").write(f"# Rapport Sleepy Mimo — {date}\n\n⏸️ L'épisode {episode} n'est pas encore écrit : rien n'a été produit.\n")
+            return
+        plan["story"] = dict(EPISODES[0], id=sid, title=LONG_EPISODES[sid]["title"])
+    elif plan.get("story") and os.environ.get("EPISODE_OVERRIDE"):
         plan["story"] = EPISODES[(episode - 1) % len(EPISODES)]
     long_ep = LONG_EPISODES.get(plan["story"]["id"]) if plan.get("story") else None
     if long_ep:
@@ -143,13 +155,14 @@ def main():
         log("Publieur : envoi désactivé ou connexion non configurée, vidéos laissées en téléchargement")
 
     # ---------- Mémoire + rapport ----------
-    mem.add_day(dict(date=date, run=os.environ.get("GITHUB_RUN_ID", "local"),
+    if not TEST:
+      mem.add_day(dict(date=date, run=os.environ.get("GITHUB_RUN_ID", "local"),
                      long=dict(title=long_meta["title"], theme=plan["long_theme"], story=story["id"] if story else None, episode=episode if story else None,
                                originals=[t["item"][1] for t in plan["tracks"] if t["item"][0] == "orig"],
                                video_id=results[0].get("video_id")),
                      shorts=[dict(title=m["title"], theme=s["theme"], song=s["name"], video_id=r.get("video_id"))
                              for m, s, r in zip(short_metas, plan["shorts"], results[1:])]))
-    report = rapporteur.write(date, results, guard_issues, guard_notes + [f"Consigne : {w}" for w in warnings], analytics, uploaded, f"reports/{date}.md")
+    report = rapporteur.write(date, results, guard_issues, guard_notes + [f"Consigne : {w}" for w in warnings], analytics, uploaded, f"{OUT}/rapport_test.md" if TEST else f"reports/{date}.md")
     if os.environ.get("GITHUB_STEP_SUMMARY"):
         open(os.environ["GITHUB_STEP_SUMMARY"], "a").write(report)
     for d in os.listdir(OUT):
