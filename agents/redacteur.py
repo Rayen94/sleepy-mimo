@@ -132,9 +132,9 @@ EPISODE_TITLES = [
 
 
 S2_TITLES = [
-    "{story} 🌙 Sleepy Mimo: Wild Nights, Episode {ep} | Animal Bedtime Adventure",
-    "Wild Nights Ep. {ep}: {story} 🦊 Bedtime Story with Real Animals",
-    "{story} ✨ Sleepy Mimo Wild Nights {ep} | Nature Bedtime Story for Kids",
+    "{story} 🌙 Animal Bedtime Story for Kids | Sleepy Mimo Ep. {ep}",
+    "{story} ✨ Calm Nature Bedtime Story | Sleepy Mimo Wild Nights {ep}",
+    "{story} 🦉 Sleepy Animal Story for Kids | Wild Nights Ep. {ep}",
 ]
 
 

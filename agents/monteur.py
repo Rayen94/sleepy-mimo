@@ -10,7 +10,12 @@ X264 = ["-c:v", "libx264", "-preset", "slow", "-tune", "animation", "-pix_fmt", 
 
 def _raster(svg):
     import cairosvg
-    return cairosvg.svg2png(bytestring=svg.encode())
+    from . import style
+    png = cairosvg.svg2png(bytestring=svg.encode())
+    if style.s2():                       # saison 2 : étalonnage « caméra de nature » (agents/cinema.py)
+        from . import cinema
+        return cinema.look(png)
+    return png
 
 
 def _pool():
