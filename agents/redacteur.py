@@ -129,7 +129,7 @@ def tiktok_caption(story, part, parts):
     pt = f" (part {part}/{parts})" if parts > 1 else ""
     nxt = " Follow for the next part! 🌙" if part < parts else " Full episode on YouTube: Sleepy Mimo 🌙"
     return (f"{t}{pt} 🐻 Cozy animal bedtime story for kids.{nxt} "
-            "#bedtimestory #kidsstories #storytime #lullaby #animalstories #sleepymimo #bedtime")
+            "#bedtimestory #bedtimestoriesforkids #kidsstories #toddlers #storytime #lullaby #animalstories #sleepymimo")
 
 
 EPISODE_TITLES = [
@@ -140,10 +140,14 @@ EPISODE_TITLES = [
 ]
 
 
+# Mots-clés choisis avec vidIQ (nov. 2026) : "bedtime stories for toddlers" ≈44 000 recherches/mois (+81 %),
+# "calming bedtime stories for kids with relaxing music" ≈5 900/mois et peu concurrencé ; "animal bedtime stories" < 750.
 S2_TITLES = [
-    "{story} 🌙 Animal Bedtime Story for Kids | Sleepy Mimo Ep. {ep}",
-    "{story} ✨ Calm Nature Bedtime Story | Sleepy Mimo Wild Nights {ep}",
-    "{story} 🦉 Sleepy Animal Story for Kids | Wild Nights Ep. {ep}",
+    "{story} 🌙 Calming Bedtime Stories for Toddlers | Sleepy Mimo Ep. {ep}",
+    "{story} ✨ Calming Bedtime Story for Kids | Wild Nights Ep. {ep}",
+    "{story} 🦉 Bedtime Stories for Kids with Relaxing Music | Sleepy Mimo {ep}",
+    # Titre en question (hook) : ×2,5 de vues/heure après ce type de changement chez une petite chaîne d'ours (vidIQ).
+    "Can Mimo Fall Asleep? {story} 🌙 Calming Bedtime Story | Ep. {ep}",
 ]
 
 
@@ -192,8 +196,10 @@ def _episode_meta_s2(rng, ep, number, res, used_titles, extra_tags=()):
             + (f"🦉 Real animal fact: {ep['fact']}\n\n" if ep.get("fact") else "")
             + (f"🎵 Songs: {', '.join(dict.fromkeys(songs))}\n\n" if songs else "")
             + "⏱️ Chapters\n" + chapters +
-            "\n\n💤 Calm, kind stories to end the day. The episode finishes with soft lullabies while everyone falls asleep.\n\n"
-            "#bedtimestory #animalsforkids #sleepymimo #wildnights #lullaby")
-    tags = ["sleepy mimo", "wild nights", "bedtime story", "bedtime stories for kids", "animal stories for kids", "nature for kids",
+            "\n\n💤 Calming bedtime stories for toddlers and kids, with relaxing music: calm, kind stories to end the day. "
+            "The episode finishes with soft lullabies while everyone falls asleep.\n\n"
+            "#bedtimestories #bedtimestoriesforkids #animalsforkids #sleepymimo #lullaby")
+    tags = ["sleepy mimo", "wild nights", "bedtime stories for toddlers", "bedtime stories for kids", "calming bedtime stories",
+            "calming bedtime stories for kids with relaxing music", "kids bedtime stories", "animal stories for kids", "nature for kids",
             "lullabies for babies", "kids cartoon", "story for kids", ep["title"].lower()] + [s.lower() for s in songs[:3]] + list(extra_tags)
     return dict(title=title, description=desc, tags=tags[:30])
