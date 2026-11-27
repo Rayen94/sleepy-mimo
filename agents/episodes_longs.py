@@ -490,7 +490,9 @@ EP6 = dict(id="s1e06", title="Mimo and the Lost Star", chapters=[
 
 from .episodes_longs2 import EP7, EP8, EP9, EP10, EP11, EP12
 from .episodes_s2a import S2E01, S2E02, S2E03, S2E04, S2E05, S2E06
+from .episodes_s2b import S2E07, S2E08, S2E09, S2E10, S2E11, S2E12
 
 LONG_EPISODES = {"s1e01": EP1, "s1e02": EP2, "s1e03": EP3, "s1e04": EP4, "s1e05": EP5, "s1e06": EP6,
                  "s1e07": EP7, "s1e08": EP8, "s1e09": EP9, "s1e10": EP10, "s1e11": EP11, "s1e12": EP12,
-                 "s2e01": S2E01, "s2e02": S2E02, "s2e03": S2E03, "s2e04": S2E04, "s2e05": S2E05, "s2e06": S2E06}
+                 "s2e01": S2E01, "s2e02": S2E02, "s2e03": S2E03, "s2e04": S2E04, "s2e05": S2E05, "s2e06": S2E06,
+                 "s2e07": S2E07, "s2e08": S2E08, "s2e09": S2E09, "s2e10": S2E10, "s2e11": S2E11, "s2e12": S2E12}
