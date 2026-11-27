@@ -11,6 +11,12 @@ pause: non
 # Envoyer les vidéos sur YouTube (en privé) ? non = vidéos seulement téléchargeables dans GitHub
 envoyer_sur_youtube: oui
 
+# Publication automatique : non = tout reste en PRIVÉ et c'est toi qui publies (recommandé tant que tu veux tout vérifier).
+# oui = YouTube passe tout seul les vidéos en PUBLIC à l'heure choisie (l'épisode à cette heure, les 3 Shorts ensuite).
+publication_automatique: non
+# Heure de l'épisode (heure de Paris, de 0 à 23). Les Shorts sortent 2 h, 4 h et 6 h après.
+heure_publication: 17
+
 # ---------- Vidéo longue ----------
 duree_video_longue_minutes: 60
 # Changer de décor (et d'instrument) toutes les X minutes dans la vidéo longue

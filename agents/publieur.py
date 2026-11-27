@@ -16,11 +16,14 @@ def service():
     return build("youtube", "v3", credentials=creds, cache_discovery=False)
 
 
-def upload(yt, path, meta, thumb=None):
+def upload(yt, path, meta, thumb=None, publish_at=None):
+    """publish_at : date UTC (ISO 8601). Si elle est donnée, la vidéo reste privée puis YouTube la passe en public à cette heure."""
     from googleapiclient.http import MediaFileUpload
     body = {"snippet": {"title": meta["title"], "description": meta["description"], "tags": meta["tags"],
                         "categoryId": "10", "defaultLanguage": "en", "defaultAudioLanguage": "en"},
             "status": {"privacyStatus": "private", "selfDeclaredMadeForKids": True}}
+    if publish_at:
+        body["status"]["publishAt"] = publish_at
     req = yt.videos().insert(part="snippet,status", body=body, media_body=MediaFileUpload(path, chunksize=8 * 1024 * 1024, resumable=True))
     resp = None
     while resp is None:

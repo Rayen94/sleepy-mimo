@@ -9,7 +9,7 @@ def write(date, results, guard_issues, guard_notes, analytics, uploaded, path):
     L.append("")
     L.append("## Vidéos produites")
     for r in results:
-        etat = "envoyée en PRIVÉ sur la chaîne" if r.get("video_id") else ("bloquée" if r["problemes"] else "prête (non envoyée)")
+        etat = ("programmée : YouTube la passera en PUBLIC le " + r["programme"].replace("T", " à ")[:16] + " (UTC)") if r.get("programme") else "envoyée en PRIVÉ sur la chaîne" if r.get("video_id") else ("bloquée" if r["problemes"] else "prête (non envoyée)")
         L.append(f"- **{r['type']}** — {r['titre']}  ")
         L.append(f"  Résolution : {r['infos'].get('resolution', '?')} · Durée : {r['infos'].get('duree', '?')} s · Son moyen : {r['infos'].get('volume_moyen', '?')} dB · État : {etat}")
         if r.get("video_id"):

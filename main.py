@@ -132,6 +132,17 @@ def main():
 
     # ---------- Publication ----------
     analytics, uploaded = None, False
+    publish_times = {}
+    if cfg.get("auto_publish"):          # consigne « publication_automatique: oui » : YouTube publie à l'heure choisie (heure de Paris)
+        import datetime as _dt
+        from zoneinfo import ZoneInfo
+        paris = ZoneInfo("Europe/Paris")
+        now = _dt.datetime.now(paris)
+        base = now.replace(hour=int(cfg["publish_hour"]), minute=0, second=0, microsecond=0)
+        if base <= now + _dt.timedelta(minutes=30):
+            base += _dt.timedelta(days=1)
+        for k, name in enumerate(["Vidéo longue"] + [f"Short {i}" for i in range(1, len(short_metas) + 1)]):
+            publish_times[name] = (base + _dt.timedelta(hours=2 * k)).astimezone(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
     if publieur.configured() and cfg["upload"]:
         yt = publieur.service()
         if guard_issues:
@@ -142,7 +153,9 @@ def main():
                     continue
                 log(f"Publieur : envoi en privé — {r['titre']}")
                 try:
-                    r["video_id"], r["miniature"] = publieur.upload(yt, r["fichier"], r["meta"], r["thumb"])
+                    pub = publish_times.get(r["type"]) if cfg.get("auto_publish") else None
+                    r["video_id"], r["miniature"] = publieur.upload(yt, r["fichier"], r["meta"], r["thumb"], publish_at=pub)
+                    r["programme"] = pub
                     uploaded = True
                 except Exception as e:          # ex. limite d'envois YouTube du jour atteinte : on garde la vidéo en téléchargement
                     log(f"Publieur : envoi impossible ({str(e)[:200]})")
