@@ -23,7 +23,7 @@ def engine():
     return _K
 
 
-def synth(text, voice, speed=1.0):
+def synth(text, voice, speed=1.0, lang="en-us"):
     """Renvoie (signal mono float, fréquence d'échantillonnage)."""
-    y, sr = engine().create(text, voice=voice, speed=speed, lang="en-us")
+    y, sr = engine().create(text, voice=voice, speed=speed, lang=lang)
     return np.asarray(y, dtype=np.float64), sr

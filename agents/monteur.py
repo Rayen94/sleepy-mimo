@@ -28,7 +28,7 @@ def duration(path):
     return float(json.loads(out)["format"]["duration"])
 
 
-def encode(svg_frames, out, gop, audio=None, extra=(), crf=23):
+def encode(svg_frames, out, gop, audio=None, extra=(), crf=23, raster=None):
     """Rastérise les images en parallèle et les envoie directement à ffmpeg (pas de fichiers temporaires)."""
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", str(FPS), "-c:v", "png", "-i", "-"]
     if audio:
@@ -41,7 +41,7 @@ def encode(svg_frames, out, gop, audio=None, extra=(), crf=23):
     cmd += list(extra) + [out]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     with _pool() as pool:
-        for png in pool.imap(_raster, svg_frames, chunksize=4):
+        for png in pool.imap(raster or _raster, svg_frames, chunksize=4):
             p.stdin.write(png)
     p.stdin.close()
     if p.wait() != 0:

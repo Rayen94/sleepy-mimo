@@ -14,6 +14,34 @@ def log(msg):
     print(f"[{datetime.datetime.now():%H:%M:%S}] {msg}", flush=True)
 
 
+def produce_tiktok(date, cfg):
+    """Série TikTok en français (agents/tiktok_fr.py) : autres histoires que YouTube, 62 à 90 s, légendes dans output/tiktok.md.
+    Ne dépend pas de l'épisode YouTube du jour. Ne doit jamais empêcher la production YouTube : toute erreur est seulement signalée."""
+    notes = []
+    if not cfg.get("n_tiktok") or os.environ.get("NO_TIKTOK"):
+        return notes
+    try:
+        from agents import tiktok_fr
+        vids = tiktok_fr.pick(date, cfg["n_tiktok"])
+        if not vids:
+            notes.append("TikTok : tous les scénarios de la série sont déjà sortis. Dis-moi d'en écrire de nouveaux.")
+            log(notes[-1]); return notes
+        md = ["# Vidéos TikTok du jour (en français)", "",
+              "Poste-les dans l'ordre, avec quelques heures d'écart. Coche « contenu généré par IA » dans TikTok. "
+              "Copie la légende telle quelle (elle contient les mots-clés).", ""]
+        for i, vid in enumerate(vids, 1):
+            rng_tt = np.random.default_rng(int(date.replace("-", "")) * 10 + i)
+            dur = tiktok_fr.make(vid, f"{OUT}/tiktok{i}.mp4", rng_tt, log=log)
+            part = f", partie {vid['part']}/{vid['parts']}" if vid["parts"] > 1 else ""
+            md += [f"## tiktok{i}.mp4 — {vid['serie']} : {vid['title']}{part} ({dur:.0f} s)", "", "Légende :", "", tiktok_fr.legende(vid), ""]
+            notes.append(f"TikTok {i} : {vid['serie']} — {vid['title']}{part} ({dur:.0f} s), fichier tiktok{i}.mp4")
+        open(f"{OUT}/tiktok.md", "w", encoding="utf-8").write("\n".join(md))
+    except Exception as e:
+        notes.append(f"TikTok : production impossible aujourd'hui ({str(e)[:160]}). YouTube n'est pas touché.")
+        log(notes[-1])
+    return notes
+
+
 def main():
     date = os.environ.get("RUN_DATE") or datetime.date.today().isoformat()
     rng = np.random.default_rng(int(date.replace("-", "")))
@@ -54,7 +82,8 @@ def main():
         if sid not in LONG_EPISODES:
             log(f"Directeur : l'épisode {episode} ({sid}) n'est pas encore écrit. Rien n'est produit (on ne rejoue pas la saison 1).")
             os.makedirs("reports", exist_ok=True)
-            open(f"reports/{date}.md", "w").write(f"# Rapport Sleepy Mimo — {date}\n\n⏸️ L'épisode {episode} n'est pas encore écrit : rien n'a été produit.\n")
+            notes_tt = produce_tiktok(date, cfg)
+            open(f"reports/{date}.md", "w").write(f"# Rapport Sleepy Mimo — {date}\n\n⏸️ L'épisode {episode} n'est pas encore écrit : rien n'a été produit sur YouTube.\n\n" + "\n".join(f"- {n}" for n in notes_tt) + "\n")
             return
         plan["story"] = dict(EPISODES[0], id=sid, title=LONG_EPISODES[sid]["title"])
     elif plan.get("story") and os.environ.get("EPISODE_OVERRIDE"):
@@ -116,23 +145,8 @@ def main():
             monteur.encode(frames, f"{OUT}/short{i}.mp4", gop=monteur.FPS * 2, audio=f"{OUT}/short{i}.wav", crf=20)
             short_metas.append(redacteur.short_meta(rng, s, used_titles, cfg["extra_tags"]))
 
-    # ---------- Vidéos TikTok (≥ 1 minute, éligibles au programme de récompenses) ----------
-    if story and cfg.get("n_tiktok") and not os.environ.get("NO_TIKTOK"):
-        import wave
-        parts_tt = [(a, b) for (a, b) in histoires.short_parts(story["shots"], story["total"], cfg["n_tiktok"], min_len=62.0, max_len=88.0) if b - a >= 60.0]
-        md = ["# Vidéos TikTok du jour", "",
-              "Poste-les dans l'ordre, avec un peu d'écart (par exemple une le matin, une le soir).",
-              "Coche le réglage « contenu généré par IA » de TikTok par prudence. Légendes en anglais, prêtes à copier-coller.", ""]
-        for i, (t0, t1) in enumerate(parts_tt, 1):
-            log(f"TikTok {i} : épisode {episode}, partie {i}/{len(parts_tt)} ({t1 - t0:.0f} s)")
-            x = histoires.short_audio(story["audio"], t0, t1)
-            w = wave.open(f"{OUT}/tiktok{i}.wav", "wb"); w.setnchannels(2); w.setsampwidth(2); w.setframerate(44100)
-            w.writeframes((np.clip(compositeur.limit(x), -1, 1) * 32767).astype("<i2").tobytes()); w.close()
-            frames = histoires.short_frames(story["shots"], t0, t1, story["seed"], episode, story["title"], i, len(parts_tt), platform="tiktok")
-            monteur.encode(frames, f"{OUT}/tiktok{i}.mp4", gop=monteur.FPS * 2, audio=f"{OUT}/tiktok{i}.wav", crf=21)
-            md += [f"## tiktok{i}.mp4 ({t1 - t0:.0f} s)", "", redacteur.tiktok_caption(story, i, len(parts_tt)), ""]
-        if parts_tt:
-            open(f"{OUT}/tiktok.md", "w", encoding="utf-8").write("\n".join(md))
+    # ---------- Vidéos TikTok : série en français, séparée de YouTube ----------
+    tiktok_notes = produce_tiktok(date, cfg)
 
     # ---------- Contrôles ----------
     log("Gardien des règles + Contrôleur qualité")
@@ -192,7 +206,7 @@ def main():
                                video_id=results[0].get("video_id")),
                      shorts=[dict(title=m["title"], theme=s["theme"], song=s["name"], video_id=r.get("video_id"))
                              for m, s, r in zip(short_metas, plan["shorts"], results[1:])]))
-    report = rapporteur.write(date, results, guard_issues, guard_notes + [f"Consigne : {w}" for w in warnings], analytics, uploaded, f"{OUT}/rapport_test.md" if TEST else f"reports/{date}.md")
+    report = rapporteur.write(date, results, guard_issues, guard_notes + tiktok_notes + [f"Consigne : {w}" for w in warnings], analytics, uploaded, f"{OUT}/rapport_test.md" if TEST else f"reports/{date}.md")
     if os.environ.get("GITHUB_STEP_SUMMARY"):
         open(os.environ["GITHUB_STEP_SUMMARY"], "a").write(report)
     for d in os.listdir(OUT):
