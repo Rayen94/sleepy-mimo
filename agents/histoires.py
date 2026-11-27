@@ -457,7 +457,7 @@ def short_parts(shots, total, n, min_len=25.0, max_len=58.0):
     return parts
 
 
-def short_frames(shots, t0, t1, seed, episode, title, part, parts, W=1080, H=1920):
+def short_frames(shots, t0, t1, seed, episode, title, part, parts, W=1080, H=1920, platform="yt"):
     dur = t1 - t0
     n = int(round(dur * FPS))
     s = H / 720
@@ -494,6 +494,8 @@ def short_frames(shots, t0, t1, seed, episode, title, part, parts, W=1080, H=192
             pulse = 1 + 0.04 * math.sin(2 * math.pi * 1.2 * ts)
             last = part == parts
             l1, l2 = ("Watch the full", "episode!") if last else ("To be", "continued...")
+            if platform == "tiktok":
+                l1, l2 = ("Full episode on", "YouTube!") if last else ("Follow for", f"part {part + 1}!")
             body.append(f'<g opacity="{op:.3f}" transform="translate({W/2} 330) scale({pulse:.3f}) translate({-W/2} -330)">'
                         + I.text(W / 2, 300, l1, 88, "#FFFFFF") + I.text(W / 2, 400, l2, 88, "#FFE37A") + "</g>")
         yield I.svg(W, H, "".join(body))

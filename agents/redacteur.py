@@ -123,6 +123,15 @@ def short_story_meta(rng, story, part, parts, used_titles, extra_tags=()):
     return dict(title=title, description=desc, tags=tags)
 
 
+def tiktok_caption(story, part, parts):
+    """Légende TikTok (en anglais) : accroche courte + mots-clés. Prête à copier-coller."""
+    t = story["title"]
+    pt = f" (part {part}/{parts})" if parts > 1 else ""
+    nxt = " Follow for the next part! 🌙" if part < parts else " Full episode on YouTube: Sleepy Mimo 🌙"
+    return (f"{t}{pt} 🐻 Cozy animal bedtime story for kids.{nxt} "
+            "#bedtimestory #kidsstories #storytime #lullaby #animalstories #sleepymimo #bedtime")
+
+
 EPISODE_TITLES = [
     "Sleepy Mimo Episode {ep}: {story} 🌙 Bedtime Story with Songs for Kids",
     "{story} ✨ Sleepy Mimo Episode {ep} | Story, Songs & Lullabies",

@@ -116,6 +116,23 @@ def main():
             monteur.encode(frames, f"{OUT}/short{i}.mp4", gop=monteur.FPS * 2, audio=f"{OUT}/short{i}.wav", crf=20)
             short_metas.append(redacteur.short_meta(rng, s, used_titles, cfg["extra_tags"]))
 
+    # ---------- Vidéos TikTok (≥ 1 minute, éligibles au programme de récompenses) ----------
+    if story and cfg.get("n_tiktok") and not os.environ.get("NO_TIKTOK"):
+        import wave
+        parts_tt = [(a, b) for (a, b) in histoires.short_parts(story["shots"], story["total"], cfg["n_tiktok"], min_len=62.0, max_len=88.0) if b - a >= 60.0]
+        md = ["# Vidéos TikTok du jour", "",
+              "Poste-les dans l'ordre, avec un peu d'écart (par exemple une le matin, une le soir).",
+              "Coche le réglage « contenu généré par IA » de TikTok par prudence. Légendes en anglais, prêtes à copier-coller.", ""]
+        for i, (t0, t1) in enumerate(parts_tt, 1):
+            log(f"TikTok {i} : épisode {episode}, partie {i}/{len(parts_tt)} ({t1 - t0:.0f} s)")
+            x = histoires.short_audio(story["audio"], t0, t1)
+            w = wave.open(f"{OUT}/tiktok{i}.wav", "wb"); w.setnchannels(2); w.setsampwidth(2); w.setframerate(44100)
+            w.writeframes((np.clip(compositeur.limit(x), -1, 1) * 32767).astype("<i2").tobytes()); w.close()
+            frames = histoires.short_frames(story["shots"], t0, t1, story["seed"], episode, story["title"], i, len(parts_tt), platform="tiktok")
+            monteur.encode(frames, f"{OUT}/tiktok{i}.mp4", gop=monteur.FPS * 2, audio=f"{OUT}/tiktok{i}.wav", crf=21)
+            md += [f"## tiktok{i}.mp4 ({t1 - t0:.0f} s)", "", redacteur.tiktok_caption(story, i, len(parts_tt)), ""]
+        if parts_tt:
+            open(f"{OUT}/tiktok.md", "w", encoding="utf-8").write("\n".join(md))
 
     # ---------- Contrôles ----------
     log("Gardien des règles + Contrôleur qualité")

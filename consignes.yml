@@ -37,6 +37,10 @@ decor_video_longue:
 nombre_shorts: 3            # de 0 à 5
 duree_shorts_secondes: 45   # de 15 à 170
 
+# Vidéos TikTok verticales de 62 à 88 secondes tirées de l'épisode (TikTok ne rémunère que les vidéos d'au moins 1 minute).
+# Elles ne sont PAS envoyées sur YouTube : elles sont dans le dossier téléchargeable, avec leurs légendes (fichier tiktok.md).
+nombre_tiktok: 2           # de 0 à 4
+
 # Accroche affichée en GROS pendant les 3 premières secondes des Shorts (2 lignes, 18 caractères max, en anglais)
 accroches_shorts:
   - ["Shhh...", "Mimo is sleeping"]
