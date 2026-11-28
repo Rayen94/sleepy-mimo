@@ -9,7 +9,8 @@ import os
 import io, os, math, wave, datetime
 import numpy as np
 from . import histoires as H, comediens as V, voixia, illustrateur as I, style, monteur, decors as D, compositeur
-from .tiktok_fr_scripts import BANK, SERIE_FAITS
+from .tiktok_fr_scripts import BANK as _BANK_BASE, SERIE_FAITS
+from .tiktok_fr_noel import DANS_FORET, ADVENT, SERIE_AVENT, SERIE_DANS
 
 SR = V.SR
 FPS = monteur.FPS
@@ -34,14 +35,38 @@ FR_VOICES = {
 SPEAKER_COLOR = {"narrator": "#FFFFFF"}
 
 
+def _order():
+    """Ordre de sortie : « Dans cette forêt… » (le format qui marche le mieux en ce moment) d'abord, une fable ou un fait en second ;
+    la partie 2 d'une fable sort le lendemain de la partie 1."""
+    base, dans, out = list(_BANK_BASE), list(DANS_FORET), []
+    while base or dans:
+        if dans:
+            out.append(dans.pop(0))
+        for _ in range(1):
+            if base:
+                out.append(base.pop(0))
+    return out
+
+
+BANK = _order()
+
+
 def pick(date, n):
-    """Les n vidéos du jour (déterministe : relancer la même journée redonne les mêmes vidéos)."""
-    d = (date if isinstance(date, datetime.date) else datetime.date.fromisoformat(date)) - START
-    out = []
-    for i in range(n):
-        k = d.days * n + i
-        if 0 <= k < len(BANK):
-            out.append(BANK[k])
+    """Les n vidéos du jour (déterministe : relancer la même journée redonne les mêmes vidéos).
+    Du 1er au 24 décembre, la première place est prise par l'épisode du Calendrier de l'Avent du jour (s'il est écrit)."""
+    target = date if isinstance(date, datetime.date) else datetime.date.fromisoformat(date)
+    p, out = 0, []
+    day = START
+    while day <= target:
+        slots, today = n, []
+        adv = ADVENT.get(day.day) if day.month == 12 and day.day <= 24 else None
+        if adv and slots:
+            today.append(adv); slots -= 1
+        for _ in range(slots):
+            if p < len(BANK):
+                today.append(BANK[p]); p += 1
+        out = today
+        day += datetime.timedelta(days=1)
     return out
 
 
@@ -67,7 +92,18 @@ def _speak(who, text, mult):
     return _CACHE[key]
 
 
+def _jour(vid):
+    try:
+        return int(vid["label"].split()[1].split("/")[0])
+    except Exception:
+        return 0
+
+
 def _cta(vid):
+    if vid["serie"] == SERIE_AVENT:
+        return ("narrator", "Suis-moi pour ne pas rater la suite du calendrier !"), ("Demain :", f"jour {_jour(vid) + 1} !")
+    if vid["serie"] == SERIE_DANS:
+        return ("narrator", "Suis-moi pour une nouvelle histoire dans cette forêt !"), ("Suis-moi pour", "la prochaine histoire !")
     if vid["parts"] > 1 and vid["part"] < vid["parts"]:
         return ("narrator", "La suite arrive très vite. Suis-moi pour ne pas la rater !"), ("La suite", "très vite !")
     if vid["parts"] > 1:
@@ -93,6 +129,58 @@ def timeline(vid, mult, lead=0.2, gap=0.28, shot_gap=0.22):
     return shots, clips, total
 
 
+# ------------------------------------------------------------------ bruitages (faits ici, doux, sans droits d'auteur)
+def _env(n, attack=0.01, decay=6.0):
+    t = np.arange(n) / SR
+    return np.minimum(1.0, t / attack) * np.exp(-decay * t)
+
+
+def _whoosh(rng, dur=0.42):
+    n = int(SR * dur); t = np.arange(n) / SR
+    f = 250 + 1700 * (t / dur) ** 1.6
+    tone = np.sin(2 * np.pi * np.cumsum(f) / SR)
+    noise = rng.standard_normal(n); noise = np.convolve(noise, np.ones(6) / 6, mode="same")
+    env = np.sin(np.pi * np.clip(t / dur, 0, 1)) ** 2
+    return (0.55 * tone + 0.45 * noise) * env * 0.16
+
+
+def _pop(f0=900, dur=0.14):
+    n = int(SR * dur); t = np.arange(n) / SR
+    f = f0 * np.exp(-6 * t)
+    return np.sin(2 * np.pi * np.cumsum(f) / SR) * _env(n, 0.004, 22) * 0.20
+
+
+def _sparkle():
+    out = np.zeros(int(SR * 0.9))
+    for k, f in enumerate((1318.5, 1760.0, 2093.0, 2637.0)):
+        n = int(SR * 0.45); t = np.arange(n) / SR
+        b = np.sin(2 * np.pi * f * t) * _env(n, 0.004, 7.5) * 0.10
+        i = int(SR * 0.07 * k); out[i:i + n] += b
+    return out
+
+
+def sfx_track(shots, total, rng):
+    """Petits bruitages aux endroits clés : « pop » à l'accroche, « whoosh » à chaque changement de décor,
+    « pop » sur les exclamations des personnages, scintillement à la carte de fin."""
+    n = int(total * SR)
+    out = np.zeros(n)
+
+    def put(t, y):
+        i = int(t * SR)
+        if 0 <= i < n:
+            out[i:i + len(y)] += y[:n - i]
+    put(0.03, _pop(700, 0.18))
+    for sh in shots[1:]:
+        put(max(0.0, sh["start"] - 0.12), _whoosh(rng))
+    for sh in shots:
+        for ln in sh["lines_t"]:
+            if ln["who"] != "narrator" and "!" in ln["text"]:
+                put(sh["start"] + ln["start"] + 0.02, _pop(1000 + 150 * int(rng.integers(0, 3)), 0.12))
+    put(max(0.0, total - 3.0), _sparkle())
+    return out
+
+
+
 def build(vid, rng):
     """Calcule les plans, la voix et la musique. La vitesse de la voix est ajustée pour dépasser 62 s."""
     mult = 1.0
@@ -111,7 +199,8 @@ def build(vid, rng):
     m = compositeur.reverb(compositeur.render(bpm * 0.95, mel, ch, inst, 12, 0, total + 1, seed=int(rng.integers(1000))))[:n]
     bg = np.zeros((n, 2)); bg[:len(m)] += m * 0.20
     voice_st = compositeur.reverb(voice) * 0.18 + np.stack([voice, voice], 1) * 0.82
-    audio = voice_st + bg
+    fx = sfx_track(shots, total, rng)[:n]
+    audio = voice_st + bg + np.stack([fx, fx], 1)
     k = int(SR * 0.4); audio[:k] *= np.linspace(0, 1, k)[:, None]
     k = int(SR * 1.2); audio[-k:] *= np.linspace(1, 0, k)[:, None]
     return shots, total, audio, mult
@@ -174,7 +263,7 @@ def _measure(text, size, weight=700):
 
 def _caption_svg(group, active, y, size=88):
     """Chaque mot est posé à sa propre position : contour sombre dessous, mot clair dessus (le mot actif est jaune)."""
-    space = _measure(" ", size) or size * 0.25
+    space = max(_measure(" ", size), size * 0.30)
     widths = [_measure(w, size) for w in group]
     total = sum(widths) + space * (len(group) - 1)
     x = W / 2 - total / 2
@@ -194,34 +283,79 @@ def _outlined(x, y, s, size, fill="#FFFFFF", weight=700):
 
 
 # ------------------------------------------------------------------ images
+FRAMING = {                       # (zoom, hauteur de la caméra au-dessus du sol, centrée sur la tête ?)
+    "wide": (1.00, 70, False), "med": (1.28, 64, False), "close": (1.65, 54, True), "xclose": (2.05, 50, True),
+}
+_CYCLE = ["wide", "close", "med", "close", "med", "xclose"]
+
+
+def _beats(sh):
+    """Temps de caméra d'un plan : un changement de cadre à chaque réplique, et toutes les ~3,4 s dans les longues répliques."""
+    cuts = [0.0]
+    for ln in sh["lines_t"]:
+        cuts.append(ln["start"])
+        if ln["dur"] > 5.0:
+            n = int(ln["dur"] // 3.4)
+            cuts += [ln["start"] + ln["dur"] * k / (n + 1) for k in range(1, n + 1)]
+    cuts = sorted(set(round(c, 3) for c in cuts))
+    return [c for i, c in enumerate(cuts) if i == 0 or c - cuts[i - 1] > 1.1] or [0.0]
+
+
+def _frame_for(sh, k, t, first_shot):
+    """Cadre du k-ième temps : large au début, puis gros plans sur celui qui parle (ou en alternance pendant le narrateur)."""
+    kind = "wide" if k == 0 else _CYCLE[k % len(_CYCLE)]
+    ln = next((l for l in sh["lines_t"] if l["start"] <= t + 0.05 < l["start"] + l["dur"]), None)
+    if ln and ln["who"] != "narrator" and kind == "close" and ("!" in ln["text"] or "?" in ln["text"]):
+        kind = "xclose"
+    who = None
+    if ln and ln["who"] != "narrator":
+        who = ln["who"]
+    else:                                                  # narrateur : on alterne entre les personnages à l'écran
+        cast = [c[0] for c in sh["cast"]]
+        who = cast[k % len(cast)]
+    return kind, who
+
+
 def frames(vid, shots, total, seed):
     """Génère des paires (décor, texte) : le décor passe par l'étalonnage « cinéma », le texte reste net par-dessus."""
     n = int(round(total * FPS))
     events = caption_events(shots)
     ei = 0
     s = HT / 720
-    cx_s, last_si = None, -1
     series = vid["serie"]
-    part_tag = f"PARTIE {vid['part']}/{vid['parts']}" if vid["parts"] > 1 else None
+    part_tag = vid.get("label") or (f"PARTIE {vid['part']}/{vid['parts']}" if vid["parts"] > 1 else None)
     hook_rows = H._wrap(vid["hook"], 17)
     _, end_pair = _cta(vid)
+    beats = [_beats(sh) for sh in shots]
+    last_key, cx_s, cy_w, zoom0, beat_t0, beat_len = None, 0.0, 0.0, 1.0, 0.0, 3.0
     for kf in range(n):
         ts = kf / FPS
         si = max((i for i, sh in enumerate(shots) if sh["start"] <= ts + 1e-6), default=0)
         sh = shots[si]
         local = max(0.0, ts - sh["start"])
         acts, speaking = H.actors(sh, local)
-        xs = [a["x"] for a in acts]
-        mid = sum(xs) / len(xs)
-        spk = next((a["x"] for a in acts if speaking and a["who"] == speaking["who"]), mid)
-        target = mid + 0.55 * (spk - mid)
-        if si != last_si or cx_s is None:
-            cx_s, last_si = target, si
-        else:
-            cx_s += (target - cx_s) * 0.10
-        zoom = 1.12 + 0.06 * min(1.0, local / max(2.0, sh["dur"])) + 0.05 * (1 - I.smooth(min(1.0, local / 0.5)))
+        bk = max(i for i, c in enumerate(beats[si]) if c <= local + 1e-6)
         gy = D.ground(sh["decor"])
-        world = (f'<g transform="translate({W/2} 1080) scale({s * zoom:.4f}) translate({-cx_s:.1f} {-(gy - 70):.1f})">'
+        kind, who = _frame_for(sh, bk, beats[si][bk], si == 0)
+        z0, off, head = FRAMING[kind]
+        tgt_act = next((a for a in acts if a["who"] == who), acts[0])
+        mid = sum(a["x"] for a in acts) / len(acts)
+        if kind == "wide":
+            target = mid
+        elif kind == "med":
+            target = mid + 0.7 * (tgt_act["x"] - mid)
+        else:
+            target = tgt_act["x"] + 70 * tgt_act["f"]
+        if (si, bk) != last_key:                           # changement de cadre : coupe franche, pas de glissement
+            last_key = (si, bk)
+            cx_s, cy_w, zoom0, beat_t0 = target, gy - off, z0, ts
+            nxt = beats[si][bk + 1] if bk + 1 < len(beats[si]) else sh["dur"]
+            beat_len = max(1.0, nxt - beats[si][bk])
+        else:
+            cx_s += (target - cx_s) * 0.12
+        lb = ts - beat_t0
+        zoom = zoom0 * (1.0 + 0.05 * min(1.0, lb / beat_len) + 0.07 * max(0.0, 1 - lb / 0.22) ** 2)
+        world = (f'<g transform="translate({W/2} 1080) scale({s * zoom:.4f}) translate({-cx_s:.1f} {-cy_w:.1f})">'
                  f'{H.shot_inner(sh, local, seed + si)}'
                  f'<defs><linearGradient id="bt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060B1C" stop-opacity="0"/>'
                  f'<stop offset="0.045" stop-color="#060B1C" stop-opacity="1"/><stop offset="1" stop-color="#060B1C"/></linearGradient></defs>'
@@ -238,7 +372,10 @@ def frames(vid, shots, total, seed):
             y0 = 440
             block = [f'<rect x="50" y="{y0 - 95}" width="980" height="{h}" rx="34" fill="#0B1030" opacity="0.58"/>']
             block += [_outlined(W / 2, y0 + i * 100, r_, 76) for i, r_ in enumerate(hook_rows)]
-            over.append(f'<g opacity="{op:.3f}">{"".join(block)}</g>')
+            u = min(1.0, ts / 0.3)
+            pop = 0.8 + 0.2 * (1 + 2.70158 * (u - 1) ** 3 + 1.70158 * (u - 1) ** 2)
+            cy_h = y0 - 95 + h / 2
+            over.append(f'<g opacity="{op:.3f}" transform="translate({W/2} {cy_h:.0f}) scale({pop:.3f}) translate({-W/2} {-cy_h:.0f})">{"".join(block)}</g>')
         # sous-titres dynamiques
         while ei < len(events) - 1 and events[ei][1] <= ts:
             ei += 1
@@ -270,6 +407,10 @@ def raster_pair(pair):
 # ------------------------------------------------------------------ production
 def legende(vid):
     """Description TikTok en français, prête à copier-coller."""
+    if vid["serie"] == SERIE_AVENT:
+        return f"{vid['hook']} ({SERIE_AVENT}, {vid['label'].lower()}) Un nouvel épisode chaque jour jusqu'à Noël, suis-moi pour ne rien rater ! {vid['tags']}"
+    if vid["serie"] == SERIE_DANS:
+        return f"{vid['hook']} ({vid['serie']}) Suis-moi pour d'autres histoires dans cette forêt ! {vid['tags']}"
     if vid["parts"] > 1:
         suite = "Partie 2 très vite, suis-moi pour ne pas la rater !" if vid["part"] < vid["parts"] else "Suis-moi pour la prochaine histoire !"
         return f"{vid['hook']} ({vid['serie']} - {vid['title']}, partie {vid['part']}/{vid['parts']}) {suite} {vid['tags']}"
@@ -295,6 +436,10 @@ def make(vid, out_mp4, rng, log=print):
 def commentaire(vid):
     """Question à épingler en premier commentaire (c'est toi qui l'écris sous la vidéo) : les commentaires et les partages
     pèsent beaucoup dans la diffusion, et une question simple donne envie de répondre."""
+    if vid["serie"] == SERIE_AVENT:
+        return "Quel est ton moment préféré de Noël ? Dis-le en commentaire, et dis-moi quelle histoire tu veux demain 👇"
+    if vid["serie"] == SERIE_DANS:
+        return "Et toi, tu aurais fait quoi à sa place ? Dis-le en commentaire, et propose-moi une autre règle étrange pour cette forêt 👇"
     if vid["serie"] == SERIE_FAITS:
         return "Tu connaissais ce secret ? Dis-moi en commentaire quel animal tu veux découvrir ensuite 👇"
     if vid["part"] < vid["parts"]:
