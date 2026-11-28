@@ -1,7 +1,7 @@
 name: Sleepy Mimo - TikTok en français
 
 # Production TikTok SÉPARÉE de YouTube : autres histoires, autre langue, autre montage, son propre « travail » GitHub.
-# Chaque vidéo est rendue sur sa propre machine, en parallèle (15 minutes au lieu de 15 minutes par vidéo).
+# Chaque vidéo est rendue sur sa propre machine, en parallèle, en vraie 3D (three.js dans un Chrome sans écran).
 # Elle ne publie rien : les vidéos et les légendes sont sur la branche « tiktok-du-jour » et dans l'artefact « tiktok-du-jour »
 # (à poster par toi, après validation).
 on:
@@ -30,13 +30,33 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  tiktok:
+  plan:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 5
+    outputs:
+      index: ${{ steps.p.outputs.index }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: p
+        env:
+          IDS: ${{ github.event.inputs.ids }}
+          COUNT: ${{ github.event.inputs.count }}
+        run: |
+          if [ -n "$IDS" ]; then N=$(echo "$IDS" | tr ',' '\n' | grep -c .)
+          elif [ -n "$COUNT" ]; then N="$COUNT"
+          else N=$(grep -E '^nombre_tiktok:' consignes.yml | head -1 | sed -E 's/[^0-9]*([0-9]+).*/\1/'); fi
+          N=${N:-2}
+          [ "$N" -ge 1 ] || N=1
+          echo "index=$(python3 -c "import json; print(json.dumps(list(range(1, $N + 1))))")" >> "$GITHUB_OUTPUT"
+
+  tiktok:
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
-        index: [1, 2, 3, 4]
+        index: ${{ fromJson(needs.plan.outputs.index) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -51,6 +71,17 @@ jobs:
           sudo apt-get install -y -q --no-install-recommends -o Acquire::Retries=5 ffmpeg libcairo2 libass9 espeak-ng mbrola mbrola-us1 mbrola-us3 fluidsynth
           mkdir -p ~/.fonts && cp fonts/Fredoka.ttf ~/.fonts/ && fc-cache -f
           pip install -q -r requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Installer le moteur 3D (three.js + navigateur sans écran)
+        timeout-minutes: 10
+        working-directory: render3d
+        run: |
+          npm ci
+          google-chrome --version
 
       - name: Garder la banque d'instruments en mémoire
         uses: actions/cache@v4

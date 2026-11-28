@@ -6,15 +6,16 @@ autre montage). Ce qui a fait ses preuves chez les petits comptes francophones (
   - plus d'une minute (seuil du programme de récompenses TikTok).
 Rien n'est repris d'un autre créateur : scénarios, dessins, voix et musique sont produits ici."""
 import os
-import io, os, math, wave, datetime
+import io, math, wave, datetime, shutil
 import numpy as np
-from . import histoires as H, comediens as V, voixia, illustrateur as I, style, monteur, decors as D, compositeur
+from . import histoires as H, comediens as V, voixia, illustrateur as I, style, monteur, decors as D, compositeur, monde3d
 from .tiktok_fr_scripts import BANK as _BANK_BASE, SERIE_FAITS
 from .tiktok_fr_noel import DANS_FORET, ADVENT, SECRETS, SERIE_AVENT, SERIE_DANS
 
 SR = V.SR
 FPS = monteur.FPS
 W, HT = 1080, 1920
+ESPECES_3D = ("fox", "owl", "hedgehog", "bunny", "otter", "fawn", "beaver", "turtle")
 START = datetime.date(2026, 11, 28)          # jour 0 de la série
 MIN_SECONDS = 62.0                           # TikTok : au moins 1 minute pour être éligible aux récompenses
 
@@ -400,8 +401,9 @@ def _frame_for(sh, k, t, first_shot):
     return kind, who
 
 
-def frames(vid, shots, total, seed):
-    """Génère des paires (décor, texte) : le décor passe par l'étalonnage « cinéma », le texte reste net par-dessus."""
+def frames(vid, shots, total, seed, mode3d=False):
+    """Génère des paires (décor, texte) : le décor passe par l'étalonnage « cinéma », le texte reste net par-dessus.
+    mode3d : le premier élément est alors l'état de la scène 3D (dict) au lieu d'un dessin."""
     n = int(round(total * FPS))
     events = caption_events(shots)
     ei = 0
@@ -440,11 +442,20 @@ def frames(vid, shots, total, seed):
             cx_s += (target - cx_s) * 0.12
         lb = ts - beat_t0
         zoom = zoom0 * (1.0 + 0.05 * min(1.0, lb / beat_len) + 0.07 * max(0.0, 1 - lb / 0.22) ** 2)
-        world = (f'<g transform="translate({W/2} 1080) scale({s * zoom:.4f}) translate({-cx_s:.1f} {-cy_w:.1f})">'
-                 f'{H.shot_inner(sh, local, seed + si)}'
-                 f'<defs><linearGradient id="bt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060B1C" stop-opacity="0"/>'
-                 f'<stop offset="0.045" stop-color="#060B1C" stop-opacity="1"/><stop offset="1" stop-color="#060B1C"/></linearGradient></defs>'
-                 f'<rect x="-3000" y="640" width="7000" height="1800" fill="url(#bt)"/></g>')
+        if mode3d:
+            yaw = (0.11 if bk % 2 == 0 else -0.11) if kind == "wide" else -0.2 * tgt_act["f"] + (0.05 if bk % 2 else -0.05)
+            yaw += 0.05 * min(1.0, lb / beat_len) * (1 if bk % 2 == 0 else -1)
+            world = dict(decor=sh["decor"], seed=(seed + si) % 99991, t=round(ts, 4),
+                         cam=dict(x=round(cx_s, 2), kind=kind, zoom=round(zoom / zoom0, 4), yaw=round(yaw, 4)),
+                         actors=[dict(who=a["who"], x=round(a["x"], 2), f=a["f"], jump=round(a["jump"], 2), tilt=round(a["tilt"], 2),
+                                      mouth=round(a["mouth"], 3), blink=bool(a["blink"]), walk=round(a["walk"], 3), wave=round(a["wave"], 3),
+                                      look=a["look"], moving=bool(a["moving"])) for a in acts if a["who"] in ESPECES_3D])
+        else:
+            world = (f'<g transform="translate({W/2} 1080) scale({s * zoom:.4f}) translate({-cx_s:.1f} {-cy_w:.1f})">'
+                     f'{H.shot_inner(sh, local, seed + si)}'
+                     f'<defs><linearGradient id="bt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060B1C" stop-opacity="0"/>'
+                     f'<stop offset="0.045" stop-color="#060B1C" stop-opacity="1"/><stop offset="1" stop-color="#060B1C"/></linearGradient></defs>'
+                     f'<rect x="-3000" y="640" width="7000" height="1800" fill="url(#bt)"/></g>')
         over = []
         # série et numéro de partie, en haut (sous la barre de TikTok)
         over.append(_outlined(W / 2, 255, series, 40, "#E8EEFF", 600))
@@ -477,7 +488,7 @@ def frames(vid, shots, total, seed):
             pulse = 1 + 0.04 * math.sin(2 * math.pi * 1.2 * ts)
             over.append(f'<g opacity="{op:.3f}" transform="translate({W/2} 600) scale({pulse:.3f}) translate({-W/2} -600)">'
                         + _outlined(W / 2, 560, end_pair[0], 96) + _outlined(W / 2, 670, end_pair[1], 96, "#FFE37A") + "</g>")
-        yield (I.svg(W, HT, world), I.svg(W, HT, "".join(over)))
+        yield (world if mode3d else I.svg(W, HT, world), I.svg(W, HT, "".join(over)))
 
 
 def raster_pair(pair):
@@ -485,7 +496,12 @@ def raster_pair(pair):
     from PIL import Image
     from . import cinema
     world, over = pair
-    base = Image.open(io.BytesIO(cinema.look(cairosvg.svg2png(bytestring=world.encode())))).convert("RGBA")
+    if world.startswith("<"):
+        raw = cairosvg.svg2png(bytestring=world.encode())
+    else:                                                 # image 3D déjà rendue par render3d
+        with open(world, "rb") as f:
+            raw = f.read()
+    base = Image.open(io.BytesIO(cinema.look(raw))).convert("RGBA")
     top = Image.open(io.BytesIO(cairosvg.svg2png(bytestring=over.encode()))).convert("RGBA")
     base.alpha_composite(top)
     buf = io.BytesIO()
@@ -516,7 +532,16 @@ def make(vid, out_mp4, rng, log=print):
         log(f"TikTok « {vid['title']} » partie {vid['part']}/{vid['parts']} : {total:.0f} s (voix x{mult:.2f})")
         w = wave.open(wav_path, "wb"); w.setnchannels(2); w.setsampwidth(2); w.setframerate(44100)
         w.writeframes((np.clip(compositeur.limit(audio), -1, 1) * 32767).astype("<i2").tobytes()); w.close()
-        monteur.encode(frames(vid, shots, total, int(rng.integers(1e6))), out_mp4, gop=FPS * 2, audio=wav_path, crf=21, raster=raster_pair)
+        seed = int(rng.integers(1e6))
+        if monde3d.disponible() and not os.environ.get("TIKTOK_2D"):
+            etats = [st for st, _ in frames(vid, shots, total, seed, mode3d=True)]
+            dossier = out_mp4.replace(".mp4", "_3d")
+            monde3d.rendre(etats, dossier, log=log)
+            paires = ((os.path.join(dossier, f"f{i:06d}.jpg"), over) for i, (_, over) in enumerate(frames(vid, shots, total, seed, mode3d=True)))
+            monteur.encode(paires, out_mp4, gop=FPS * 2, audio=wav_path, crf=21, raster=raster_pair)
+            shutil.rmtree(dossier, ignore_errors=True)
+        else:
+            monteur.encode(frames(vid, shots, total, seed), out_mp4, gop=FPS * 2, audio=wav_path, crf=21, raster=raster_pair)
     finally:
         style.set_style("s2" if prev else "s1")
     return total

@@ -1,0 +1,9 @@
+{
+  "name": "sleepy-mimo-render3d",
+  "private": true,
+  "description": "Rendu 3D (three.js dans un Chrome sans écran) des vidéos TikTok",
+  "dependencies": {
+    "puppeteer-core": "25.19.0",
+    "three": "0.187.0"
+  }
+}

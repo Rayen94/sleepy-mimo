@@ -4,3 +4,4 @@ __pycache__/
 run.log
 models/
 sf2/
+render3d/node_modules/
