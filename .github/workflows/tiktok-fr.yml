@@ -97,6 +97,7 @@ jobs:
         run: |
           [ -s output_tiktok/tiktok1.mp4 ] || { echo "Pas de vidéo à publier"; exit 0; }
           cd output_tiktok
+          rm -f ./*.wav
           for f in tiktok*.mp4; do
             ffmpeg -loglevel error -y -i "$f" -vf "fps=1/5,scale=216:-1,tile=4x4" -frames:v 1 "apercu_${f%.mp4}.jpg" || true
           done

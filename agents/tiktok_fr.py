@@ -176,6 +176,8 @@ def sfx_track(shots, total, rng):
         for ln in sh["lines_t"]:
             if ln["who"] != "narrator" and "!" in ln["text"]:
                 put(sh["start"] + ln["start"] + 0.02, _pop(1000 + 150 * int(rng.integers(0, 3)), 0.12))
+    for t0, _kind in sticker_events(caption_events(shots)):
+        put(t0, _pop(1300, 0.16))
     put(max(0.0, total - 3.0), _sparkle())
     return out
 
@@ -282,6 +284,85 @@ def _outlined(x, y, s, size, fill="#FFFFFF", weight=700):
             f'<text x="{x}" y="{y}" {base} fill="{fill}">{_esc(s)}</text>')
 
 
+# ------------------------------------------------------------------ autocollants animés (comme les vidéos qui marchent)
+KEYMAP = {
+    "feuille": "leaf", "feuilles": "leaf", "etoile": "star", "etoiles": "star",
+    "coeur": "heart", "merci": "heart", "aime": "heart", "adore": "heart", "amie": "heart",
+    "neige": "flake", "flocon": "flake", "flocons": "flake",
+    "cadeau": "gift", "cadeaux": "gift", "paquet": "gift", "echarpe": "gift",
+    "lanterne": "flame", "bougie": "flame", "lumiere": "flame", "flamme": "flame", "lumieres": "flame",
+    "lune": "moon", "piece": "coin", "pieces": "coin", "tresor": "coin", "or": "coin",
+    "sapin": "tree", "arbre": "tree", "gateau": "cake", "pourquoi": "question", "mysterieux": "question", "mystere": "question",
+    "peur": "alert", "attention": "alert", "tempete": "alert",
+}
+
+
+def _norm(w):
+    import unicodedata
+    w = unicodedata.normalize("NFD", w.lower().strip(".,!?;:«»\"'…()"))
+    return "".join(c for c in w if unicodedata.category(c) != "Mn")
+
+
+def sticker_events(events, first=3.9, gap=2.4, limit=14):
+    """(début, type) : un autocollant jaillit à l'écran quand le mot correspondant est prononcé."""
+    out, last = [], -9.0
+    for t0, _t1, grp, j in events:
+        kind = KEYMAP.get(_norm(grp[j]))
+        if kind and t0 >= first and t0 - last >= gap and len(out) < limit:
+            out.append((t0, kind)); last = t0
+    return out
+
+
+def _icon(kind):
+    """Dessins simples (cadre 100 x 100)."""
+    st = 'stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" paint-order="stroke"'
+    if kind == "leaf":
+        return (f'<path d="M50 92 C12 62 18 20 50 6 C82 20 88 62 50 92 Z" fill="#5BC85A" {st}/>'
+                '<path d="M50 88 L50 22 M50 62 L32 46 M50 50 L68 34 M50 74 L70 58" stroke="#2C8F3C" stroke-width="4" fill="none" stroke-linecap="round"/>')
+    if kind == "star":
+        return f'<polygon points="50,6 62,37 95,38 69,58 79,92 50,72 21,92 31,58 5,38 38,37" fill="#FFD84A" {st}/>'
+    if kind == "heart":
+        return f'<path d="M50 90 C6 58 4 24 27 15 C40 11 48 19 50 27 C52 19 60 11 73 15 C96 24 94 58 50 90 Z" fill="#FF5C7A" {st}/>'
+    if kind == "flake":
+        arms = "".join(f'<g transform="rotate({a} 50 50)"><path d="M50 8 L50 92 M50 22 L40 12 M50 22 L60 12 M50 78 L40 88 M50 78 L60 88" /></g>' for a in (0, 60, 120))
+        return f'<g stroke="#FFFFFF" stroke-width="12" stroke-linecap="round" fill="none">{arms}</g><g stroke="#8ED0FF" stroke-width="6" stroke-linecap="round" fill="none">{arms}</g>'
+    if kind == "gift":
+        return (f'<rect x="14" y="42" width="72" height="48" rx="5" fill="#E5484D" {st}/><rect x="9" y="30" width="82" height="18" rx="5" fill="#C9333A" {st}/>'
+                '<rect x="44" y="30" width="12" height="60" fill="#FFD84A"/><ellipse cx="38" cy="22" rx="14" ry="10" fill="#FFD84A" stroke="#E0A800" stroke-width="3"/>'
+                '<ellipse cx="62" cy="22" rx="14" ry="10" fill="#FFD84A" stroke="#E0A800" stroke-width="3"/>')
+    if kind == "flame":
+        return (f'<rect x="36" y="52" width="28" height="40" rx="4" fill="#FFF1D0" {st}/>'
+                f'<path d="M50 4 C66 24 70 36 50 54 C30 36 34 24 50 4 Z" fill="#FFB02E" {st}/><path d="M50 22 C58 32 58 40 50 48 C42 40 42 32 50 22 Z" fill="#FFE27A"/>')
+    if kind == "moon":
+        return f'<path d="M64 8 A42 42 0 1 0 92 64 A34 34 0 1 1 64 8 Z" fill="#FFE9A8" {st}/>'
+    if kind == "coin":
+        return (f'<circle cx="50" cy="50" r="42" fill="#FFD23F" {st}/><circle cx="50" cy="50" r="31" fill="none" stroke="#E0A800" stroke-width="5"/>'
+                '<path d="M36 38 Q50 24 64 38" stroke="#FFF3B0" stroke-width="6" fill="none" stroke-linecap="round"/>')
+    if kind == "tree":
+        return (f'<rect x="43" y="76" width="14" height="18" fill="#7A4B26"/><polygon points="50,8 78,40 62,40 86,68 14,68 38,40 22,40" fill="#2E9E5B" {st}/>'
+                '<circle cx="42" cy="56" r="4" fill="#FF5C7A"/><circle cx="60" cy="46" r="4" fill="#FFD84A"/><circle cx="52" cy="66" r="4" fill="#8ED0FF"/>')
+    if kind == "cake":
+        return (f'<rect x="12" y="58" width="76" height="32" rx="6" fill="#F2A65A" {st}/><rect x="20" y="38" width="60" height="26" rx="6" fill="#FFE1B8" {st}/>'
+                '<rect x="46" y="18" width="8" height="20" fill="#8ED0FF"/><path d="M50 4 C57 12 57 16 50 20 C43 16 43 12 50 4 Z" fill="#FFB02E"/>')
+    if kind == "question":
+        return (f'<circle cx="50" cy="50" r="42" fill="#7C5CFF" {st}/><text x="50" y="72" font-family="Fredoka, sans-serif" font-weight="700" font-size="66" text-anchor="middle" fill="#FFFFFF">?</text>')
+    return (f'<circle cx="50" cy="50" r="42" fill="#FF8A3D" {st}/><text x="50" y="72" font-family="Fredoka, sans-serif" font-weight="700" font-size="66" text-anchor="middle" fill="#FFFFFF">!</text>')
+
+
+def _sticker_svg(kind, t, idx, size=250):
+    """Un autocollant qui jaillit (rebond), flotte un peu, puis disparaît."""
+    dur = 1.7
+    u = min(1.0, t / 0.28)
+    pop = 0.3 + 0.7 * (1 + 2.70158 * (u - 1) ** 3 + 1.70158 * (u - 1) ** 2)
+    fade = 1.0 if t < dur - 0.3 else max(0.0, (dur - t) / 0.3)
+    x = 540 + (-250 if idx % 2 == 0 else 250) * 0.8 * (1 if idx % 3 else 0.0)
+    y = 640 - 28 * t
+    rot = (-7 if idx % 2 == 0 else 7) * (1 - u) + 4 * math.sin(2 * math.pi * 0.9 * t)
+    sc = size / 100 * pop
+    return (f'<g opacity="{fade:.3f}" transform="translate({x:.0f} {y:.0f}) rotate({rot:.1f}) scale({sc:.3f}) translate(-50 -50)">'
+            f'<g opacity="0.35" transform="translate(4 6)">{_icon(kind)}</g>{_icon(kind)}</g>')
+
+
 # ------------------------------------------------------------------ images
 FRAMING = {                       # (zoom, hauteur de la caméra au-dessus du sol, centrée sur la tête ?)
     "wide": (1.00, 70, False), "med": (1.28, 64, False), "close": (1.65, 54, True), "xclose": (2.05, 50, True),
@@ -327,6 +408,7 @@ def frames(vid, shots, total, seed):
     hook_rows = H._wrap(vid["hook"], 17)
     _, end_pair = _cta(vid)
     beats = [_beats(sh) for sh in shots]
+    stickers = sticker_events(events)
     last_key, cx_s, cy_w, zoom0, beat_t0, beat_len = None, 0.0, 0.0, 1.0, 0.0, 3.0
     for kf in range(n):
         ts = kf / FPS
@@ -376,6 +458,10 @@ def frames(vid, shots, total, seed):
             pop = 0.8 + 0.2 * (1 + 2.70158 * (u - 1) ** 3 + 1.70158 * (u - 1) ** 2)
             cy_h = y0 - 95 + h / 2
             over.append(f'<g opacity="{op:.3f}" transform="translate({W/2} {cy_h:.0f}) scale({pop:.3f}) translate({-W/2} {-cy_h:.0f})">{"".join(block)}</g>')
+        # autocollants qui jaillissent sur les mots importants
+        for si_, (st0, kind) in enumerate(stickers):
+            if st0 <= ts < st0 + 1.7:
+                over.append(_sticker_svg(kind, ts - st0, si_))
         # sous-titres dynamiques
         while ei < len(events) - 1 and events[ei][1] <= ts:
             ei += 1
