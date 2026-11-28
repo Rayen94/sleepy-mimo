@@ -10,7 +10,7 @@ import io, math, wave, datetime, shutil
 import numpy as np
 from . import histoires as H, comediens as V, voixia, illustrateur as I, style, monteur, decors as D, compositeur, monde3d
 from .tiktok_fr_scripts import BANK as _BANK_BASE, SERIE_FAITS
-from .tiktok_fr_noel import DANS_FORET, ADVENT, SECRETS, SERIE_AVENT, SERIE_DANS
+from .tiktok_fr_noel import DANS_FORET, ADVENT, SECRETS, GATEAUX, COURSE, SERIE_AVENT, SERIE_DANS
 
 SR = V.SR
 FPS = monteur.FPS
@@ -37,13 +37,11 @@ SPEAKER_COLOR = {"narrator": "#FFFFFF"}
 
 
 def _order():
-    """Ordre de sortie : au début « Dans cette forêt… » et la mini-série « Les Secrets de la Forêt » en alternance (les parties se suivent
-    d'un jour à l'autre), puis le reste (une fable ou un fait, avec « Dans cette forêt… »)."""
-    base, dans, sec, out = list(_BANK_BASE), list(DANS_FORET), list(SECRETS), []
-    while sec:
-        if dans:
-            out.append(dans.pop(0))
-        out.append(sec.pop(0))
+    """Ordre de sortie : d'abord les 3 séries de 3 parties (une partie de chaque série par tour, pour que le public attende la suite),
+    puis « Dans cette forêt… » et le reste de la banque en alternance."""
+    base, dans, out = list(_BANK_BASE), list(DANS_FORET), []
+    for i in range(3):
+        out += [SECRETS[i], GATEAUX[i], COURSE[i]]
     while base or dans:
         if dans:
             out.append(dans.pop(0))
@@ -562,7 +560,7 @@ def commentaire(vid):
 
 
 def find(vid_id):
-    for v in list(BANK) + list(ADVENT.values()):
+    for v in list(BANK) + list(ADVENT.values()) + list(SECRETS) + list(GATEAUX) + list(COURSE):
         if v["id"] == vid_id:
             return v
     raise KeyError(f"scénario inconnu : {vid_id}")
