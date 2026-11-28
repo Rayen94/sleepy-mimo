@@ -17,7 +17,7 @@ on:
         default: ""
 
 permissions:
-  contents: read
+  contents: write          # pour publier les vidéos du jour sur la branche « tiktok-du-jour »
 
 concurrency:
   group: tiktok
@@ -89,3 +89,21 @@ jobs:
           path: output_tiktok/
           retention-days: 7
           if-no-files-found: ignore
+
+      - name: Publier les vidéos sur la branche « tiktok-du-jour » (à télécharger depuis GitHub, même sur téléphone)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -s output_tiktok/tiktok1.mp4 ] || { echo "Pas de vidéo à publier"; exit 0; }
+          cd output_tiktok
+          for f in tiktok*.mp4; do
+            ffmpeg -loglevel error -y -i "$f" -vf "fps=1/5,scale=216:-1,tile=4x4" -frames:v 1 "apercu_${f%.mp4}.jpg" || true
+          done
+          git init -q -b tiktok-du-jour
+          git config user.name "Sleepy Mimo Bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Vidéos TikTok du $(date -u +%F)"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" tiktok-du-jour
+          echo "Vidéos publiées : https://github.com/${GITHUB_REPOSITORY}/tree/tiktok-du-jour"
