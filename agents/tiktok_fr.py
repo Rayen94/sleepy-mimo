@@ -17,6 +17,7 @@ FPS = monteur.FPS
 W, HT = 1080, 1920
 ESPECES_3D = ("fox", "owl", "hedgehog", "bunny", "otter", "fawn", "beaver", "turtle")
 START = datetime.date(2026, 11, 28)          # jour 0 de la série
+DEJA_FAITES = 9                                # les 9 premières vidéos (3 séries de 3 parties) ont été produites à la main : le rendu du jour reprend après
 MIN_SECONDS = 62.0                           # TikTok : au moins 1 minute pour être éligible aux récompenses
 
 # (voix Kokoro, vitesse, décalage des formants, facteur de hauteur) — une seule voix française, déclinée en timbres différents
@@ -57,7 +58,7 @@ def pick(date, n):
     """Les n vidéos du jour (déterministe : relancer la même journée redonne les mêmes vidéos).
     Du 1er au 24 décembre, la première place est prise par l'épisode du Calendrier de l'Avent du jour (s'il est écrit)."""
     target = date if isinstance(date, datetime.date) else datetime.date.fromisoformat(date)
-    p, out = 0, []
+    p, out = DEJA_FAITES, []
     day = START
     while day <= target:
         slots, today = n, []
