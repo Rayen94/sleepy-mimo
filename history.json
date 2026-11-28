@@ -381,6 +381,45 @@
      "video_id": "MW5Nqe2uG1o"
     }
    ]
+  },
+  {
+   "date": "2026-11-28",
+   "run": "46085864837",
+   "long": {
+    "title": "Sleepy Mimo Episode 7: Pip Can't Sleep 🌙 Bedtime Story with Songs for Kids",
+    "theme": "moon",
+    "story": "s1e07",
+    "episode": 7,
+    "originals": [
+     "Mimo's Misty Night Song",
+     "Mimo's Snuggly Tune",
+     "Mimo's Lavender Dream",
+     "Mimo's Cuddly Hush",
+     "Mimo's Sleepy Lullaby",
+     "Mimo's Velvet Goodnight"
+    ],
+    "video_id": "hZHbCVQsA1o"
+   },
+   "shorts": [
+    {
+     "title": "Pip Can't Sleep (Part 1) 🌙 Sleepy Mimo Episode 7 #shorts #kids",
+     "theme": "rain",
+     "song": "Mimo's Snuggly Lullaby",
+     "video_id": "nDHMcnjBmhw"
+    },
+    {
+     "title": "Pip Can't Sleep (Part 2) 🌙 Sleepy Mimo Episode 7 #shorts #kids",
+     "theme": "ocean",
+     "song": "Mimo's Pillow Tune",
+     "video_id": null
+    },
+    {
+     "title": "Pip Can't Sleep (Part 3) 🌙 Sleepy Mimo Episode 7 #shorts #kids",
+     "theme": "forest",
+     "song": "Mimo's Velvet Melody",
+     "video_id": null
+    }
+   ]
   }
  ]
 }
