@@ -517,8 +517,8 @@ def legende(vid):
     if vid["serie"] == SERIE_DANS:
         return f"{vid['hook']} ({vid['serie']}) Suis-moi pour d'autres histoires dans cette forêt ! {vid['tags']}"
     if vid["parts"] > 1:
-        suite = "Partie 2 très vite, suis-moi pour ne pas la rater !" if vid["part"] < vid["parts"] else "Suis-moi pour la prochaine histoire !"
-        return f"{vid['hook']} ({vid['serie']} - {vid['title']}, partie {vid['part']}/{vid['parts']}) {suite} {vid['tags']}"
+        suite = f"La partie {vid['part'] + 1} arrive très vite, suis-moi pour ne pas la rater !" if vid["part"] < vid["parts"] else "Suis-moi pour la prochaine série !"
+        return f"Histoire animée en 3D, partie {vid['part']}/{vid['parts']} : {vid['hook']} ({vid['serie']} - {vid['title']}) {suite} {vid['tags']}"
     return f"{vid['hook']} ({vid['serie']}) Suis-moi pour d'autres secrets d'animaux ! {vid['tags']}"
 
 
