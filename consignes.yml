@@ -39,7 +39,7 @@ duree_shorts_secondes: 45   # de 15 à 170
 
 # Vidéos TIKTOK, en français, séparées de YouTube (autres histoires, autre langue) : séries « Les Fables de la Forêt » (histoires en 2 parties)
 # et « Le saviez-vous ? » (vrais faits sur les animaux). Chaque vidéo dure de 62 à 90 secondes (TikTok ne rémunère que les vidéos d'au moins 1 minute).
-# Elles ne partent PAS sur YouTube : elles sont dans le dossier téléchargeable, avec leurs légendes (fichier tiktok.md).
+# Elles ne partent PAS sur YouTube : workflow à part (« Sleepy Mimo - TikTok en français », chaque matin), vidéos + légendes (tiktok.md) dans l'artefact « tiktok-du-jour ».
 nombre_tiktok: 2           # de 0 à 4
 
 # Accroche affichée en GROS pendant les 3 premières secondes des Shorts (2 lignes, 18 caractères max, en anglais)

@@ -87,6 +87,7 @@ jobs:
           EPISODE_OVERRIDE: ${{ github.event.inputs.episode }}
           SHORTS_OVERRIDE: ${{ github.event.inputs.shorts }}
           TEST_RUN: ${{ github.event.inputs.test }}
+          NO_TIKTOK: "1"          # TikTok a son propre workflow (tiktok-fr.yml)
         run: python main.py
 
       - name: Garder les vidéos en téléchargement (7 jours)

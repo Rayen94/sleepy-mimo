@@ -290,3 +290,24 @@ def make(vid, out_mp4, rng, log=print):
     finally:
         style.set_style("s2" if prev else "s1")
     return total
+
+
+def produce(date, n, out_dir, log=print):
+    """Produit les n vidéos TikTok du jour dans out_dir + tiktok.md (légendes françaises). Renvoie la liste de notes."""
+    notes = []
+    vids = pick(date, n)
+    if not vids:
+        notes.append("TikTok : tous les scénarios de la série sont déjà sortis. Dis-moi d'en écrire de nouveaux.")
+        log(notes[-1]); return notes
+    os.makedirs(out_dir, exist_ok=True)
+    md = ["# Vidéos TikTok du jour (en français)", "",
+          "Poste-les dans l'ordre, avec quelques heures d'écart. Coche « contenu généré par IA » dans TikTok. "
+          "Copie la légende telle quelle (elle contient les mots-clés).", ""]
+    for i, vid in enumerate(vids, 1):
+        rng_tt = np.random.default_rng(int(date.replace("-", "")) * 10 + i)
+        dur = make(vid, f"{out_dir}/tiktok{i}.mp4", rng_tt, log=log)
+        part = f", partie {vid['part']}/{vid['parts']}" if vid["parts"] > 1 else ""
+        md += [f"## tiktok{i}.mp4 — {vid['serie']} : {vid['title']}{part} ({dur:.0f} s)", "", "Légende :", "", legende(vid), ""]
+        notes.append(f"TikTok {i} : {vid['serie']} — {vid['title']}{part} ({dur:.0f} s), fichier tiktok{i}.mp4")
+    open(f"{out_dir}/tiktok.md", "w", encoding="utf-8").write("\n".join(md))
+    return notes

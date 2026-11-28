@@ -15,27 +15,14 @@ def log(msg):
 
 
 def produce_tiktok(date, cfg):
-    """Série TikTok en français (agents/tiktok_fr.py) : autres histoires que YouTube, 62 à 90 s, légendes dans output/tiktok.md.
-    Ne dépend pas de l'épisode YouTube du jour. Ne doit jamais empêcher la production YouTube : toute erreur est seulement signalée."""
+    """Série TikTok en français : désormais produite par son propre workflow (tiktok_main.py). Ici seulement si on le demande.
+    Ne doit jamais empêcher la production YouTube : toute erreur est seulement signalée."""
     notes = []
     if not cfg.get("n_tiktok") or os.environ.get("NO_TIKTOK"):
         return notes
     try:
         from agents import tiktok_fr
-        vids = tiktok_fr.pick(date, cfg["n_tiktok"])
-        if not vids:
-            notes.append("TikTok : tous les scénarios de la série sont déjà sortis. Dis-moi d'en écrire de nouveaux.")
-            log(notes[-1]); return notes
-        md = ["# Vidéos TikTok du jour (en français)", "",
-              "Poste-les dans l'ordre, avec quelques heures d'écart. Coche « contenu généré par IA » dans TikTok. "
-              "Copie la légende telle quelle (elle contient les mots-clés).", ""]
-        for i, vid in enumerate(vids, 1):
-            rng_tt = np.random.default_rng(int(date.replace("-", "")) * 10 + i)
-            dur = tiktok_fr.make(vid, f"{OUT}/tiktok{i}.mp4", rng_tt, log=log)
-            part = f", partie {vid['part']}/{vid['parts']}" if vid["parts"] > 1 else ""
-            md += [f"## tiktok{i}.mp4 — {vid['serie']} : {vid['title']}{part} ({dur:.0f} s)", "", "Légende :", "", tiktok_fr.legende(vid), ""]
-            notes.append(f"TikTok {i} : {vid['serie']} — {vid['title']}{part} ({dur:.0f} s), fichier tiktok{i}.mp4")
-        open(f"{OUT}/tiktok.md", "w", encoding="utf-8").write("\n".join(md))
+        notes = tiktok_fr.produce(date, cfg["n_tiktok"], OUT, log=log)
     except Exception as e:
         notes.append(f"TikTok : production impossible aujourd'hui ({str(e)[:160]}). YouTube n'est pas touché.")
         log(notes[-1])

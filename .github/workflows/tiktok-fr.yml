@@ -1,0 +1,91 @@
+name: Sleepy Mimo - TikTok en français
+
+# Production TikTok SÉPARÉE de YouTube : autres histoires, autre langue, autre montage, son propre « travail » GitHub.
+# Elle ne publie rien : les vidéos et les légendes sont dans l'artefact « tiktok-du-jour » (à poster par toi, après validation).
+on:
+  schedule:
+    - cron: "37 5 * * *"    # tous les jours vers 6h37 à Paris : les vidéos sont prêtes le matin
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "Nombre de vidéos (vide = comme dans consignes.yml)"
+        required: false
+        default: ""
+      date:
+        description: "Jour à refaire, AAAA-MM-JJ (vide = aujourd'hui)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tiktok
+  cancel-in-progress: false
+
+jobs:
+  tiktok:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installer les outils
+        timeout-minutes: 20
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends -o Acquire::Retries=5 ffmpeg libcairo2 libass9 espeak-ng mbrola mbrola-us1 mbrola-us3 fluidsynth
+          mkdir -p ~/.fonts && cp fonts/Fredoka.ttf ~/.fonts/ && fc-cache -f
+          pip install -q -r requirements.txt
+
+      - name: Garder la banque d'instruments en mémoire
+        uses: actions/cache@v4
+        with:
+          path: sf2
+          key: soundfont-fluidr3-v1
+
+      - name: Télécharger la banque de vrais instruments (une seule fois)
+        timeout-minutes: 15
+        continue-on-error: true
+        run: |
+          if [ ! -s sf2/FluidR3_GM.sf2 ]; then
+            cd /tmp
+            apt-get download -o Acquire::Retries=5 fluid-soundfont-gm
+            dpkg-deb -x fluid-soundfont-gm*.deb sfx
+            mkdir -p "$GITHUB_WORKSPACE/sf2"
+            cp sfx/usr/share/sounds/sf2/FluidR3_GM.sf2 "$GITHUB_WORKSPACE/sf2/"
+          fi
+          ls -la "$GITHUB_WORKSPACE/sf2"
+
+      - name: Garder le modèle de voix en mémoire
+        uses: actions/cache@v4
+        with:
+          path: models
+          key: kokoro-v1.0
+
+      - name: Télécharger le modèle de voix naturelles (une seule fois)
+        timeout-minutes: 15
+        run: |
+          mkdir -p models
+          B=https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0
+          [ -s models/kokoro-v1.0.int8.onnx ] || curl -sSL -o models/kokoro-v1.0.int8.onnx $B/kokoro-v1.0.int8.onnx
+          [ -s models/voices-v1.0.bin ] || curl -sSL -o models/voices-v1.0.bin $B/voices-v1.0.bin
+
+      - name: Produire les vidéos TikTok du jour
+        env:
+          TIKTOK_COUNT: ${{ github.event.inputs.count }}
+          RUN_DATE: ${{ github.event.inputs.date }}
+        run: python tiktok_main.py
+
+      - name: Garder les vidéos TikTok en téléchargement (7 jours)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tiktok-du-jour
+          path: output_tiktok/
+          retention-days: 7
+          if-no-files-found: ignore
