@@ -10,7 +10,7 @@ import io, os, math, wave, datetime
 import numpy as np
 from . import histoires as H, comediens as V, voixia, illustrateur as I, style, monteur, decors as D, compositeur
 from .tiktok_fr_scripts import BANK as _BANK_BASE, SERIE_FAITS
-from .tiktok_fr_noel import DANS_FORET, ADVENT, SERIE_AVENT, SERIE_DANS
+from .tiktok_fr_noel import DANS_FORET, ADVENT, SECRETS, SERIE_AVENT, SERIE_DANS
 
 SR = V.SR
 FPS = monteur.FPS
@@ -36,15 +36,18 @@ SPEAKER_COLOR = {"narrator": "#FFFFFF"}
 
 
 def _order():
-    """Ordre de sortie : « Dans cette forêt… » (le format qui marche le mieux en ce moment) d'abord, une fable ou un fait en second ;
-    la partie 2 d'une fable sort le lendemain de la partie 1."""
-    base, dans, out = list(_BANK_BASE), list(DANS_FORET), []
+    """Ordre de sortie : au début « Dans cette forêt… » et la mini-série « Les Secrets de la Forêt » en alternance (les parties se suivent
+    d'un jour à l'autre), puis le reste (une fable ou un fait, avec « Dans cette forêt… »)."""
+    base, dans, sec, out = list(_BANK_BASE), list(DANS_FORET), list(SECRETS), []
+    while sec:
+        if dans:
+            out.append(dans.pop(0))
+        out.append(sec.pop(0))
     while base or dans:
         if dans:
             out.append(dans.pop(0))
-        for _ in range(1):
-            if base:
-                out.append(base.pop(0))
+        if base:
+            out.append(base.pop(0))
     return out
 
 
@@ -529,28 +532,46 @@ def commentaire(vid):
     if vid["serie"] == SERIE_FAITS:
         return "Tu connaissais ce secret ? Dis-moi en commentaire quel animal tu veux découvrir ensuite 👇"
     if vid["part"] < vid["parts"]:
-        return "À ton avis, que va-t-il se passer dans la partie 2 ? Réponds en commentaire, je lis tout 👇"
+        return f"À ton avis, que va-t-il se passer dans la partie {vid['part'] + 1} ? Réponds en commentaire, je lis tout 👇"
     return "Quelle est la leçon de cette histoire pour toi ? Dis-le en commentaire, et dis-moi quelle fable tu veux ensuite 👇"
 
 
-def produce(date, n, out_dir, log=print):
-    """Produit les n vidéos TikTok du jour dans out_dir + tiktok.md (légendes françaises). Renvoie la liste de notes."""
+def find(vid_id):
+    for v in list(BANK) + list(ADVENT.values()):
+        if v["id"] == vid_id:
+            return v
+    raise KeyError(f"scénario inconnu : {vid_id}")
+
+
+def produce(date, n, out_dir, log=print, ids=None, only=None):
+    """Produit les vidéos TikTok du jour dans out_dir (+ tiktok.md, légendes françaises).
+    ids : liste d'identifiants imposés ; only : ne produire que la k-ième vidéo (pour les rendre en parallèle sur GitHub)."""
     notes = []
-    vids = pick(date, n)
+    vids = [find(i) for i in ids] if ids else pick(date, n)
     if not vids:
         notes.append("TikTok : tous les scénarios de la série sont déjà sortis. Dis-moi d'en écrire de nouveaux.")
         log(notes[-1]); return notes
     os.makedirs(out_dir, exist_ok=True)
-    md = ["# Vidéos TikTok du jour (en français)", "",
-          "Poste-les dans l'ordre, avec quelques heures d'écart. Coche « contenu généré par IA » dans TikTok. "
-          "Copie la légende telle quelle (elle contient les mots-clés).",
-          "Heures à tester en France : vers 12 h 30, 18 h 30 et 20 h 30 (ensuite, regarde dans les statistiques TikTok à quelle heure ton public est connecté).",
-          "Après avoir posté : épingle le commentaire proposé ci-dessous, puis réponds aux premiers commentaires dans l'heure (c'est toi qui écris, à la main).", ""]
+    entete = ["# Vidéos TikTok du jour (en français)", "",
+              "Poste-les dans l'ordre, avec quelques heures d'écart. Coche « contenu généré par IA » dans TikTok. "
+              "Copie la légende telle quelle (elle contient les mots-clés).",
+              "Heures à tester en France : vers 12 h 30, 18 h 30 et 20 h 30 (ensuite, regarde dans les statistiques TikTok à quelle heure ton public est connecté).",
+              "Après avoir posté : épingle le commentaire proposé ci-dessous, puis réponds aux premiers commentaires dans l'heure (c'est toi qui écris, à la main).", ""]
+    md = list(entete)
     for i, vid in enumerate(vids, 1):
+        if only and i != only:
+            continue
         rng_tt = np.random.default_rng(int(date.replace("-", "")) * 10 + i)
         dur = make(vid, f"{out_dir}/tiktok{i}.mp4", rng_tt, log=log)
         part = f", partie {vid['part']}/{vid['parts']}" if vid["parts"] > 1 else ""
-        md += [f"## tiktok{i}.mp4 — {vid['serie']} : {vid['title']}{part} ({dur:.0f} s)", "", "Légende :", "", legende(vid), "", "Commentaire à épingler :", "", commentaire(vid), ""]
+        section = [f"## tiktok{i}.mp4 — {vid['serie']} : {vid['title']}{part} ({dur:.0f} s)", "", "Légende :", "", legende(vid), "",
+                   "Commentaire à épingler :", "", commentaire(vid), ""]
         notes.append(f"TikTok {i} : {vid['serie']} — {vid['title']}{part} ({dur:.0f} s), fichier tiktok{i}.mp4")
-    open(f"{out_dir}/tiktok.md", "w", encoding="utf-8").write("\n".join(md))
+        if only:
+            open(f"{out_dir}/tiktok{i}.md", "w", encoding="utf-8").write("\n".join(section))
+        md += section
+    if not only:
+        open(f"{out_dir}/tiktok.md", "w", encoding="utf-8").write("\n".join(md))
+    elif not notes:
+        notes.append(f"TikTok : pas de vidéo n°{only} aujourd'hui.")
     return notes

@@ -6,7 +6,9 @@ from .tiktok_fr_scripts import L, R, one, two, scene
 
 SERIE_DANS = "Dans cette forêt…"
 SERIE_AVENT = "Le Calendrier de l'Avent de la Forêt"
+SERIE_SECRETS = "Les Secrets de la Forêt"
 TAGS_DANS = "#danscetteforet #histoire #conte #animaux #storytime #foret #morale #pourtoi"
+TAGS_SECRETS = "#histoire #secret #amitie #drame #animaux #storytime #foret #pourtoi"
 TAGS_AVENT = "#calendrierdelavent #noel #histoiredenoel #contedenoel #avent #histoireenfants #animaux"
 
 DANS_FORET = [
@@ -334,3 +336,75 @@ ADVENT = {
                       ("narrator", "Parce que le plus beau cadeau, ce n'est pas ce qu'il y a dans le paquet. C'est tous ceux qui ont pensé à toi. Demain, c'est le jour huit.")),
             ]),
 }
+
+# Mini-série dramatique racontée à la première personne (format « confidence » qui marche en ce moment : on ne sait pas ce qu'on nous cache)
+SECRETS = [
+    dict(id="secrets-1", serie=SERIE_SECRETS, part=1, parts=3, tags=TAGS_SECRETS + " #partie1",
+         hook="Tout le monde me cache quelque chose. Et ce soir, j'ai entendu pourquoi.",
+         title="Le secret de Fern",
+         shots=[
+             scene("meadow_night", one("fawn"),
+                   ("fawn", "Tout le monde me cache quelque chose. Depuis ce matin, je le sens, et je ne sais pas pourquoi."),
+                   ("fawn", "D'habitude, Pip m'attend devant chez moi pour jouer. Ce matin, il n'y avait personne. Pas même une trace dans l'herbe.")),
+             scene("forest_night", two("fawn", "bunny"),
+                   ("fawn", "Pip ! Tu viens jouer avec moi ?"),
+                   ("bunny", "Euh... non, Fern, pas aujourd'hui ! J'ai beaucoup, beaucoup de choses à faire !"),
+                   ("fawn", "Mais tu ne fais jamais rien le samedi ! Et il a couru se cacher derrière un buisson. Je l'ai vu. Il tenait quelque chose dans son dos.")),
+             scene("river_night", two("fawn", "otter"),
+                   ("fawn", "Alors je suis allée voir Ollie, ma meilleure amie."),
+                   ("otter", "Fern ! Salut ! Euh... je ne peux pas te parler, je dois compter les poissons !"),
+                   ("fawn", "Compter les poissons ? Ollie, tu détestes ça ! Elle a plongé dans l'eau avant même que je réponde.")),
+             scene("den", one("fawn"),
+                   ("fawn", "J'ai marché toute la journée. Chaque fois que j'arrivais, les conversations s'arrêtaient d'un coup. Chip cachait des planches derrière son dos. Hazel faisait semblant de dormir. Luna regardait ailleurs."),
+                   ("fawn", "Qu'est-ce que j'ai fait ? Pourquoi ils ne veulent plus de moi ?")),
+             scene("forest_night", two("fawn", "owl"),
+                   ("fawn", "Le soir, je suis passée près du grand chêne. J'ai entendu des voix, tout bas, derrière les racines."),
+                   ("owl", "Chut ! Plus bas ! Surtout, qu'elle ne sache rien avant samedi soir !"),
+                   ("fawn", "Avant samedi soir... Qu'est-ce qui se passe samedi soir ?")),
+         ]),
+    dict(id="secrets-2", serie=SERIE_SECRETS, part=2, parts=3, tags=TAGS_SECRETS + " #partie2",
+         hook="J'ai cru que mes amis me détestaient. Ce que Finn m'a dit m'a fait hésiter.",
+         title="Le secret de Fern",
+         shots=[
+             scene("rain_night", one("fawn"),
+                   ("fawn", "Cette nuit-là, je n'ai pas dormi. Je répétais dans ma tête les mots de Luna : surtout, qu'elle ne sache rien. J'ai tout compris. Mes amis ne voulaient plus de moi. Ils avaient un secret contre moi.")),
+             scene("forest_night", two("fawn", "hedgehog"),
+                   ("hedgehog", "Fern ? Tu es toute pâle !"),
+                   ("fawn", "Hazel, dis-moi la vérité. Vous me cachez quelque chose, tous les cinq."),
+                   ("hedgehog", "Moi ? Non ! Rien du tout ! Je dois juste aller chercher des mûres, très, très loin !"),
+                   ("fawn", "Elle est partie en courant. Même Hazel me fuyait.")),
+             scene("river_night", one("fawn"),
+                   ("fawn", "Alors j'ai pleuré, au bord de la rivière, là où personne ne me voyait. Je me suis dit : si c'est comme ça, je pars. Je pars loin d'ici, et je ne reviens plus jamais.")),
+             scene("river_night", two("fawn", "fox"),
+                   ("fox", "Fern ! Attends ! Où tu vas comme ça ?"),
+                   ("fawn", "Loin. Là où personne ne me cache plus rien, Finn."),
+                   ("fox", "Mais non, tu ne comprends pas ! C'est... Je ne peux pas te le dire ! J'ai promis !"),
+                   ("fawn", "Tu vois bien que vous me cachez quelque chose !")),
+             scene("meadow_night", two("fox", "fawn"),
+                   ("fox", "Je te jure que ce n'est pas contre toi. Fais-moi confiance, juste jusqu'à demain soir. S'il te plaît."),
+                   ("fawn", "Je l'ai regardé longtemps. Dans ses yeux, il n'y avait pas de méchanceté. Seulement de la peur de tout gâcher."),
+                   ("fawn", "D'accord, Finn. Jusqu'à demain soir. Mais si tu m'as menti, je ne te le pardonnerai jamais. Et le lendemain soir, j'ai marché jusqu'au grand chêne.")),
+         ]),
+    dict(id="secrets-3", serie=SERIE_SECRETS, part=3, parts=3, tags=TAGS_SECRETS + " #partie3",
+         hook="Ce que j'ai vu au grand chêne ce soir-là, je ne l'oublierai jamais.",
+         title="Le secret de Fern",
+         shots=[
+             scene("forest_night", one("fawn"),
+                   ("fawn", "Ce soir-là, mon cœur battait si fort que je l'entendais dans mes oreilles. Au pied du grand chêne, il faisait tout noir. Pas un bruit. J'ai fait un pas. Puis un autre.")),
+             scene("meadow_night", two("fawn", "owl"),
+                   ("fawn", "Et soudain, mille lucioles se sont allumées d'un coup, comme des étoiles qui tombent."),
+                   ("owl", "Surprise ! Merci, Fern !"),
+                   ("fawn", "Tous mes amis étaient là, en cercle autour d'une grande table. Je ne comprenais plus rien.")),
+             scene("meadow_night", two("bunny", "fawn"),
+                   ("bunny", "J'ai fait un gâteau aux noisettes pour toi ! C'est pour ça que je me cachais !"),
+                   ("fawn", "Et Ollie a pêché les poissons. Elle ne les comptait pas du tout."),
+                   ("fawn", "Hazel a ramassé des mûres, très loin. Chip a construit la table, planche après planche.")),
+             scene("forest_night", two("fox", "fawn"),
+                   ("fox", "J'ai failli tout gâcher hier. Pardon de t'avoir fait peur, Fern."),
+                   ("fawn", "Mais pourquoi tout ça ? Je n'ai rien fait de spécial !"),
+                   ("owl", "Parce que toute l'année, tu es là pour nous. Tu consoles, tu aides, tu écoutes. Et tu ne demandes jamais rien. Ce soir, c'est notre tour.")),
+             scene("dawn_hills", one("fawn"),
+                   ("fawn", "J'ai pleuré, mais de joie, cette fois. J'avais cru qu'ils ne voulaient plus de moi. En vérité, ils m'aimaient tellement qu'ils n'arrivaient pas à garder leur secret."),
+                   ("fawn", "Parfois, quand quelqu'un te cache quelque chose, ce n'est pas pour te blesser. C'est peut-être pour te faire un cadeau.")),
+         ]),
+]

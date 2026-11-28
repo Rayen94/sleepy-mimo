@@ -1,7 +1,9 @@
 name: Sleepy Mimo - TikTok en français
 
 # Production TikTok SÉPARÉE de YouTube : autres histoires, autre langue, autre montage, son propre « travail » GitHub.
-# Elle ne publie rien : les vidéos et les légendes sont dans l'artefact « tiktok-du-jour » (à poster par toi, après validation).
+# Chaque vidéo est rendue sur sa propre machine, en parallèle (15 minutes au lieu de 15 minutes par vidéo).
+# Elle ne publie rien : les vidéos et les légendes sont sur la branche « tiktok-du-jour » et dans l'artefact « tiktok-du-jour »
+# (à poster par toi, après validation).
 on:
   schedule:
     - cron: "37 5 * * *"    # tous les jours vers 6h37 à Paris : les vidéos sont prêtes le matin
@@ -15,6 +17,10 @@ on:
         description: "Jour à refaire, AAAA-MM-JJ (vide = aujourd'hui)"
         required: false
         default: ""
+      ids:
+        description: "Scénarios précis, séparés par des virgules (ex. secrets-1,secrets-2). Vide = ceux du jour."
+        required: false
+        default: ""
 
 permissions:
   contents: write          # pour publier les vidéos du jour sur la branche « tiktok-du-jour »
@@ -26,7 +32,11 @@ concurrency:
 jobs:
   tiktok:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        index: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
 
@@ -75,32 +85,62 @@ jobs:
           [ -s models/kokoro-v1.0.int8.onnx ] || curl -sSL -o models/kokoro-v1.0.int8.onnx $B/kokoro-v1.0.int8.onnx
           [ -s models/voices-v1.0.bin ] || curl -sSL -o models/voices-v1.0.bin $B/voices-v1.0.bin
 
-      - name: Produire les vidéos TikTok du jour
+      - name: Produire la vidéo TikTok n°${{ matrix.index }}
         env:
+          TIKTOK_INDEX: ${{ matrix.index }}
           TIKTOK_COUNT: ${{ github.event.inputs.count }}
+          TIKTOK_IDS: ${{ github.event.inputs.ids }}
           RUN_DATE: ${{ github.event.inputs.date }}
         run: python tiktok_main.py
 
-      - name: Garder les vidéos TikTok en téléchargement (7 jours)
+      - name: Garder la vidéo
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: tiktok-du-jour
+          name: tiktok-${{ matrix.index }}
           path: output_tiktok/
-          retention-days: 7
+          retention-days: 3
           if-no-files-found: ignore
 
-      - name: Publier les vidéos sur la branche « tiktok-du-jour » (à télécharger depuis GitHub, même sur téléphone)
-        if: always()
-        env:
-          GH_TOKEN: ${{ github.token }}
+  publier:
+    needs: tiktok
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: tiktok-*
+          merge-multiple: true
+          path: sortie
+
+      - name: Assembler les légendes et préparer les aperçus
         run: |
-          [ -s output_tiktok/tiktok1.mp4 ] || { echo "Pas de vidéo à publier"; exit 0; }
-          cd output_tiktok
+          [ -n "$(ls sortie/*.mp4 2>/dev/null)" ] || { echo "Pas de vidéo aujourd'hui"; exit 0; }
+          sudo apt-get install -y -q --no-install-recommends ffmpeg >/dev/null
+          cd sortie
           rm -f ./*.wav
+          {
+            echo "# Vidéos TikTok du jour (en français)"; echo
+            echo "Poste-les dans l'ordre, avec quelques heures d'écart. Coche « contenu généré par IA » dans TikTok. Copie la légende telle quelle (elle contient les mots-clés)."
+            echo "Heures à tester en France : vers 12 h 30, 18 h 30 et 20 h 30 (ensuite, regarde dans les statistiques TikTok à quelle heure ton public est connecté)."
+            echo "Après avoir posté : épingle le commentaire proposé ci-dessous, puis réponds aux premiers commentaires dans l'heure (c'est toi qui écris, à la main)."; echo
+            for f in $(ls tiktok[0-9].md 2>/dev/null | sort); do cat "$f"; echo; done
+          } > tiktok.md
+          rm -f tiktok[0-9].md
           for f in tiktok*.mp4; do
             ffmpeg -loglevel error -y -i "$f" -vf "fps=1/5,scale=216:-1,tile=4x4" -frames:v 1 "apercu_${f%.mp4}.jpg" || true
           done
+          ls -la
+
+      - name: Publier sur la branche « tiktok-du-jour » (à télécharger depuis GitHub, même sur téléphone)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -n "$(ls sortie/*.mp4 2>/dev/null)" ] || exit 0
+          cd sortie
           git init -q -b tiktok-du-jour
           git config user.name "Sleepy Mimo Bot"
           git config user.email "bot@users.noreply.github.com"
@@ -108,3 +148,10 @@ jobs:
           git commit -q -m "Vidéos TikTok du $(date -u +%F)"
           git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" tiktok-du-jour
           echo "Vidéos publiées : https://github.com/${GITHUB_REPOSITORY}/tree/tiktok-du-jour"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tiktok-du-jour
+          path: sortie/
+          retention-days: 7
+          if-no-files-found: ignore
